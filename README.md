@@ -23,7 +23,7 @@ This web-based application is an MVP for CoTeacher — a tool that lets users:
 * Chat interface where users can ask questions; answers are generated on server side
 * All dynamic communication handled in real time via WebSockets
 
-## Technologies Used
+## What I Used
 
 * **Python 3.10+**
 * **Flask** – for web server
