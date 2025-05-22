@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ac.tive - Course Dashboard</title>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #ecfdf5;
+            min-height: 100vh;
+        }
+        .course-section {
+            background: white;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .course-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+        .course-header:hover {
+            background: #f0fdf4;
+        }
+        .course-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .course-content.active {
+            max-height: 1000px;
+        }
+        .lesson-link {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: #4a4a4a;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+        }
+        .lesson-link:hover {
+            background: #f0fdf4;
+            border-left-color: #059669;
+            color: #059669;
+        }
+        .agent-section {
+            padding: 1rem 1.5rem;
+            background: #f0fdf4;
+            border-top: 1px solid #d1fae5;
+        }
+        .agent-link {
+            display: inline-flex;
+            align-items: center;
+            color: #059669;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .agent-link:hover {
+            text-decoration: underline;
+        }
+        .chevron {
+            transition: transform 0.3s ease;
+            width: 2rem;
+            height: 2rem;
+        }
+        .course-header.active .chevron {
+            transform: rotate(180deg);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .agent-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <!-- Logo and Header -->
+    <div class="text-center mb-8 fade-in">
+        <img src="/static/logo.png" alt="ac.tive Logo" class="h-20 mx-auto mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Your Courses</h1>
+        <p class="text-gray-600">Select a course to begin your learning journey</p>
+    </div>
+
+    <!-- Courses Container -->
+    <div class="max-w-4xl mx-auto fade-in">
+        <!-- Data Structures -->
+        <div class="course-section">
+            <div class="course-header" onclick="toggleCourse(this)">
+                <h2 class="text-xl font-semibold text-gray-800">Data Structures</h2>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div class="course-content">
+                <a href="#" class="lesson-link">Lecture #1 - Introduction to Data Structures</a>
+                <a href="#" class="lesson-link">Lecture #2 - Arrays and Linked Lists</a>
+                <a href="#" class="lesson-link">Lecture #3 - Trees and Graphs</a>
+                <div class="agent-section">
+                    <a href="#" class="agent-link">
+                        <svg class="agent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Open Data Structures Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Algorithms -->
+        <div class="course-section">
+            <div class="course-header" onclick="toggleCourse(this)">
+                <h2 class="text-xl font-semibold text-gray-800">Algorithms</h2>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div class="course-content">
+                <a href="#" class="lesson-link">Lecture #1 - Algorithm Complexity</a>
+                <a href="#" class="lesson-link">Lecture #2 - Sorting and Searching</a>
+                <a href="#" class="lesson-link">Lecture #3 - Dynamic Programming</a>
+                <div class="agent-section">
+                    <a href="#" class="agent-link">
+                        <svg class="agent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Open Algorithms Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linear Algebra -->
+        <div class="course-section">
+            <div class="course-header" onclick="toggleCourse(this)">
+                <h2 class="text-xl font-semibold text-gray-800">Linear Algebra</h2>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div class="course-content">
+                <a href="#" class="lesson-link">Lecture #1 - Vectors and Vector Spaces</a>
+                <a href="#" class="lesson-link">Lecture #2 - Matrix Operations</a>
+                <a href="#" class="lesson-link">Lecture #3 - Eigenvalues and Eigenvectors</a>
+                <div class="agent-section">
+                    <a href="#" class="agent-link">
+                        <svg class="agent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Open Linear Algebra Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculus -->
+        <div class="course-section">
+            <div class="course-header" onclick="toggleCourse(this)">
+                <h2 class="text-xl font-semibold text-gray-800">Calculus</h2>
+                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div class="course-content">
+                <a href="#" class="lesson-link">Lecture #1 - Introduction to Limits</a>
+                <a href="#" class="lesson-link">Lecture #2 - Derivatives: Concepts and Rules</a>
+                <a href="#" class="lesson-link">Lecture #3 - Applications of Derivatives</a>
+                <a href="#" class="lesson-link">Lecture #4 - Introduction to Integration</a>
+                <a href="#" class="lesson-link">Lecture #5 - Integration Techniques</a>
+                <a href="/app" class="lesson-link">New Lesson</a>
+                <div class="agent-section">
+                    <a href="#" class="agent-link">
+                        <svg class="agent-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Open Calculus Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCourse(header) {
+            const content = header.nextElementSibling;
+            header.classList.toggle('active');
+            content.classList.toggle('active');
+        }
+
+        // Open Calculus section by default
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculus = document.querySelector('.course-section:last-child');
+            const header = calculus.querySelector('.course-header');
+            const content = calculus.querySelector('.course-content');
+            header.classList.add('active');
+            content.classList.add('active');
+        });
+    </script>
+</body>
+</html> 

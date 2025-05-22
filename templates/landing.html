@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to CoTeacher</title>
+    <title>Welcome to ac.tive</title>
     <!-- Add defer to TailwindCSS to ensure it loads after the page -->
     <script src="https://cdn.tailwindcss.com" defer></script>
     <style>
@@ -12,7 +12,7 @@
             margin: 0;
             padding: 0;
             font-family: system-ui, -apple-system, sans-serif;
-            background: #fff3e0;
+            background: #ecfdf5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -20,16 +20,16 @@
         }
         .logo-container {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem;
             background: rgba(255,255,255,0.9);
             border-radius: 1rem;
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             animation: fadeIn 1.5s ease-in;
         }
         .logo {
-            max-width: 256px;
+            width: 400px;
             height: auto;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
         h1 {
             font-size: 2.5rem;
@@ -45,17 +45,17 @@
         }
         .enter-button {
             display: inline-block;
-            background: #f97316;
+            background: #059669;
             color: white;
             padding: 1rem 2rem;
             border-radius: 0.5rem;
             text-decoration: none;
             font-weight: 600;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             transition: background-color 0.3s;
         }
         .enter-button:hover {
-            background: #ea580c;
+            background: #047857;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -65,12 +65,12 @@
 </head>
 <body>
     <div class="logo-container">
-        <img src="/static/logo.png" alt="CoTeacher Logo" class="logo">
-        <h1>Welcome to CoTeacher</h1>
+        <img src="/static/logo.png" alt="ac.tive Logo" class="logo">
+        <h1>Welcome to ac.tive</h1>
         <p>
             Your AI-powered teaching assistant for enhanced learning experiences
         </p>
-        <a href="/app" class="enter-button">
+        <a href="/courses" class="enter-button">
             Enter Application
         </a>
     </div>

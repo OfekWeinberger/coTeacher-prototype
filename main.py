@@ -103,6 +103,10 @@ SUMMARY_DATA = [
 def landing():
     return render_template("landing.html")
 
+@app.route("/courses")
+def courses():
+    return render_template("courses.html")
+
 @app.route("/app")
 def app_page():
     return render_template("index.html", summary_data=SUMMARY_DATA)

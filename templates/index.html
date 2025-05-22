@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CoTeacher (SocketIO)</title>
+  <title>ac.tive</title>
 
   <!-- Socket.IO -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -28,8 +28,8 @@
   <style>
     body {
       margin: 0;
-      font-family: Poppins, sans-serif;
-      background: radial-gradient(circle, #fff3e0, #f9f7f4);
+      font-family: system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle, #ecfdf5, #f0fdf4);
       height: 100vh;
       display: flex;
       overflow: hidden;
@@ -78,9 +78,9 @@
       <div id="chat-log" class="markdown-body flex-1 overflow-auto"></div>
       <div class="mt-4 flex gap-2">
         <input id="user-input" type="text" placeholder="Ask a question…"
-          class="flex-1 bg-white/80 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-300" />
+          class="flex-1 bg-white/80 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300" />
         <button onclick="askQuestion()"
-          class="bg-orange-400 text-white font-semibold px-6 py-2 rounded-lg hover:bg-orange-500">
+          class="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-emerald-700">
           Send
         </button>
       </div>
@@ -167,7 +167,7 @@
     socket.on('chat_response', data => {
       const msg = document.createElement('div');
       msg.className = 'mb-4';
-      msg.innerHTML = marked.parse(`**You:** ${data.question}\n\n**CoTeacher:** ${data.answer}`);
+      msg.innerHTML = marked.parse(`**You:** ${data.question}\n\n**ac.tive:** ${data.answer}`);
       chatLog.appendChild(msg);
       MathJax.typesetPromise([msg]).catch(console.error);
       chatLog.scrollTop = chatLog.scrollHeight;
