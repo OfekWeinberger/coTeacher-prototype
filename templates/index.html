@@ -101,16 +101,18 @@
     function typeWriter(text, element, cb) {
       let i = 0;
       element.innerHTML = '';
-      const interval = setInterval(() => {
+      async function typeStep() {
         const current = text.slice(0, i + 1);
         element.innerHTML = marked.parse(current);
-        MathJax.typesetPromise([element]).catch(() => {});
+        await MathJax.typesetPromise([element]).catch(() => {});
         i++;
-        if (i >= text.length) {
-          clearInterval(interval);
+        if (i < text.length) {
+          setTimeout(typeStep, 20); // Adjust speed as needed
+        } else {
           cb();
         }
-      }, 20);
+      }
+      typeStep();
     }
 
     const container = document.getElementById('summary-text');
@@ -159,6 +161,7 @@
 
     // Set up video listeners
     const video = document.getElementById('video');
+    video.playbackRate = 2.0; // Play at 2x speed
     video.addEventListener('loadedmetadata', () => updateSummaryForTime(0));
     video.addEventListener('timeupdate',    () => updateSummaryForTime(video.currentTime));
     // video.addEventListener('seeked',         () => updateSummaryForTime(video.currentTime));

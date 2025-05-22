@@ -52,7 +52,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "8:09",
-        "summary": "The process leads to the concept of **Riemann sums**:\n\n\\[ \\sum_{i=1}^n f(c_i) \\Delta x_i \\]\nwhere $\\Delta x_i = x_i - x_{i-1}$ is the subinterval width and $f(c_i)$ is the height of the rectangle."
+        "summary": "The process leads to the concept of **Riemann sums**:\n\n $\\sum_{i=1}^n f(c_i) \\Delta x_i \\$\nwhere $\\Delta x_i = x_i - x_{i-1}$ is the subinterval width and $f(c_i)$ is the height of the rectangle."
     },
     {
         "timestamp": "9:13",
