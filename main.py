@@ -1,8 +1,8 @@
+# main.py
 import eventlet
-# IMPORTANT: monkey_patch before any other imports
-eventlet.monkey_patch()
+eventlet.monkey_patch()  # must come first
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 import threading, time
 
@@ -10,133 +10,190 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-# In-memory stores for transcripts & summaries
-transcript_store = {}  # video_id -> full transcript text
-summary_store = {}     # video_id -> latest markdown summary
+# ─── FIX: Declare transcript_store up here ────────────────────────────────
+transcript_store = {
+    'sample_lesson': []   # will hold { 'time': float, 'text': str } entries
+}
 
-@app.route('/')
+# Paste this into your main.py as the new summary_data
+SUMMARY_DATA = [
+    {
+        "timestamp": "0:00",
+        "summary": "The lecture introduces the topic of the **definite integral**, asking students to ignore previous associations with the integral symbol ('snakes'), as this approach will feel unrelated at first."
+    },
+    {
+        "timestamp": "0:39",
+        "summary": "We pose the key question: What is the **area under the graph** of a function $f$ over the interval $[a, b]$? The assumption is that $f$ is positive and continuous for simplicity, but must be **bounded**."
+    },
+    {
+        "timestamp": "1:52",
+        "summary": "Boundedness ensures the function doesn’t go to infinity within the interval. This makes the concept of area well-defined. We recognize we don’t yet know how to calculate areas under curves that don’t resemble familiar shapes like rectangles or circles."
+    },
+    {
+        "timestamp": "3:03",
+        "summary": "To approximate the area, we divide the interval $[a, b]$ into subintervals, choosing random points $x_1, x_2, \\ldots, x_4$, and raise vertical lines from them to the graph. This process is called a **partition**."
+    },
+    {
+        "timestamp": "4:04",
+        "summary": "Within each subinterval, we choose a point $c_i$ and evaluate the function $f(c_i)$, giving the **height** of a rectangle over that subinterval. These rectangles approximate the area under the graph."
+    },
+    {
+        "timestamp": "5:02",
+        "summary": "Five rectangles are drawn using the base of each subinterval and height $f(c_i)$. The **sum of their areas** gives an approximation of the total area under the graph—but this estimate includes **visible errors**."
+    },
+    {
+        "timestamp": "6:08",
+        "summary": "Some areas are **overcounted** (above the graph), others are **undercounted** (missed below the graph). These approximation errors can be reduced by refining the partition and using **more rectangles**."
+    },
+    {
+        "timestamp": "7:07",
+        "summary": "An example is shown: breaking a rectangle into two to improve accuracy. The idea is that finer partitions produce a **closer approximation** to the true area. Errors shrink as the partition improves."
+    },
+    {
+        "timestamp": "8:09",
+        "summary": "The process leads to the concept of **Riemann sums**:\n\n\\[ \\sum_{i=1}^n f(c_i) \\Delta x_i \\]\nwhere $\\Delta x_i = x_i - x_{i-1}$ is the subinterval width and $f(c_i)$ is the height of the rectangle."
+    },
+    {
+        "timestamp": "9:13",
+        "summary": "We clarify that this sum is an approximation of the area under the graph. By taking more rectangles, we approach a better result, but we still don’t reach the exact value—unless we use a **limit**."
+    },
+    {
+        "timestamp": "10:10",
+        "summary": "In the limit as $n \\to \\infty$, the Riemann sums converge to the **integral**, denoted temporarily as $I$:\n\n\\[ \\lim_{n \\to \\infty} \\sum_{i=1}^n f(c_i) \\Delta x_i = I \\]\nwhich represents the area under the graph."
+    },
+    {
+        "timestamp": "11:03",
+        "summary": "However, simply taking $n \\to \\infty$ isn’t precise enough. We must ensure the **entire interval** is refined—not just one part—to capture the correct limiting behavior."
+    },
+    {
+        "timestamp": "12:00",
+        "summary": "This introduces the formal idea that a definite integral is the **limit of Riemann sums** over increasingly refined partitions:\n\n\\[ \\int_a^b f(x)\\,dx = \\lim_{\\lambda(P) \\to 0} \\sum_{i=1}^n f(c_i) \\Delta x_i \\]"
+    },
+    {
+        "timestamp": "13:15",
+        "summary": "A **partition** of $[a, b]$ is defined as:\n\n\\[ a = x_0 < x_1 < \\ldots < x_n = b \\]\nIt divides the interval into subintervals $[x_{i-1}, x_i]$, over which rectangles are constructed."
+    },
+    {
+        "timestamp": "14:25",
+        "summary": "The **width** of each subinterval is:\n\n\\[ \\Delta x_i = x_i - x_{i-1} \\]\nAnd the **mesh** of a partition is:\n\n\\[ \\lambda(P) = \\max \\{ \\Delta x_1, \\Delta x_2, \\ldots, \\Delta x_n \\} \\]"
+    },
+    {
+        "timestamp": "15:35",
+        "summary": "We restate the Riemann sum:\n\n\\[ \\sum_{i=1}^n f(c_i) \\Delta x_i \\]\nEach sum depends on the function $f$, the partition $P$, and the choice of points $c_i \\in [x_{i-1}, x_i]$."
+    },
+    {
+        "timestamp": "17:10",
+        "summary": "The function $f$ is **Riemann integrable** on $[a, b]$ if the Riemann sums converge to the same value $I$, no matter which $c_i$’s are chosen, as the partition gets finer."
+    },
+    {
+        "timestamp": "18:19",
+        "summary": "This is formalized using epsilon-delta language. For every $\\varepsilon > 0$, there exists a $\\delta > 0$ such that if the partition satisfies $\\lambda(P) < \\delta$, then:\n\n\\[ \\left| \\sum_{i=1}^n f(c_i) \\Delta x_i - I \\right| < \\varepsilon \\]"
+    },
+    {
+        "timestamp": "20:20",
+        "summary": "This inequality must hold for **any** partition and **any** choice of $c_i$’s. This completes the rigorous definition of **Riemann integrability**."
+    },
+    {
+        "timestamp": "22:03",
+        "summary": "The instructor notes this is perhaps the most complex definition of the course. It will be revisited and unpacked next time with more theorems and an introduction to the **Fundamental Theorem of Calculus**."
+    }
+]
+
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html", summary_data=SUMMARY_DATA)
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
-def strip_audio(video_path):
+def transcribe_audio_stub():
     """
-    Stub: extract audio track from video.
-    Returns path to audio file (e.g., WAV/MP3).
+    Stub generator: yields (timestamp_sec, text) pairs.
     """
-    # TODO: use pydub or ffmpeg-python
-    audio_path = video_path.rsplit('.', 1)[0] + '.wav'
-    return audio_path
-
-
-def transcribe_audio(audio_path):
-    """
-    Stub: stream speech-to-text.
-    Yields chunks of transcript as they become available.
-    """
-    sample_chunks = [
-        "In this lesson, we explore the fundamentals of differential calculus.",
-        "The derivative quantifies the rate of change of a function with respect to its variable.",
-        "We demonstrate the limit definition: as h approaches zero, (f(x+h)-f(x))/h.",
-        "For example, if f(x) = x^2, then f'(x) = 2x.",
-        "Next, we consider applications of the derivative in physics, such as velocity and acceleration.",
+    sample = [
+        (0.0,  "Welcome to CoTeacher’s calculus lesson."),
+        (5.0,  "First, we define the derivative."),
+        (10.0, "The derivative is f'(x) = \\(\\lim_{h \\to 0} \\frac{f(x+h)-f(x)}{h}\\)."),
+        (20.0, "Next topic: integration as the inverse process."),
+        (30.0, "Example: integrate 2x to get x² + C.")
     ]
-    for chunk in sample_chunks:
-        time.sleep(3)
-        yield chunk
-
-
-def generate_summary(text):
-    """
-    Stub: generate a Markdown summary from full transcript so far.
-    Returns a rich demonstration summary.
-    """
-    # Rich demonstration markdown summary
-    summary = '''
-### Calculus: Derivatives & Integrals
-
-**1. The Derivative**  
-- **Definition**: The derivative measures the instantaneous rate of change of a function.  
-- **Notation**: `f'(x)`, `d/dx f(x)`  
-- **Limit Definition**:  
-```
-f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
-```
-
-**2. Key Examples**  
-- If `f(x) = x^2`, then `f'(x) = 2x`.  
-- The derivative of `sin(x)` is `cos(x)`.
-
----
-
-### Integration
-
-**1. The Integral**  
-- **Definition**: The integral accumulates the area under a curve.  
-- **Notation**: `\int f(x) dx`  
-
-**2. Fundamental Theorem of Calculus**  
-> The integral of a derivative over an interval yields the original function's net change:
-```
-\int_a^b f'(x) dx = f(b) - f(a)
-```
-
-*This summary is updated in real-time as the lesson progresses.*
-'''    
-    return summary
-
+    for ts, txt in sample:
+        time.sleep(4)
+        yield ts, txt
 
 def update_summary_loop():
-    """
-    Background thread: for a given video file,
-    strip audio -> transcribe -> update summary_store & emit updates.
-    """
-    video_id = 'sample_lesson'
-    video_path = 'static/sample_lesson.mp4'
-    # 1. Extract audio
-    audio_path = strip_audio(video_path)
-    # 2. Transcribe in chunks
-    transcript = ''
-    transcript_store[video_id] = transcript
-    for chunk in transcribe_audio(audio_path):
-        transcript += '\n' + chunk
-        transcript_store[video_id] = transcript
-        # 3. Generate & store updated summary
-        summary = generate_summary(transcript)
-        summary_store[video_id] = summary
-        # 4. Emit Markdown summary to clients
-        socketio.emit('summary_update', {'summary': summary})
+    vid = 'sample_lesson'
+    for ts, chunk in transcribe_audio_stub():
+        # Now transcript_store[vid] exists
+        transcript_store[vid].append({'time': ts, 'text': chunk})
+
+        # Emit the full “live summary” as a markdown list
+        full_md = "\n\n".join(f"- {entry['text']}" for entry in transcript_store[vid])
+        socketio.emit('summary_update', {'summary': full_md})
 
 @socketio.on('connect')
 def on_connect():
-    # On new connection, send latest summary if available
-    video_id = 'sample_lesson'
-    summary = summary_store.get(
-        video_id,
-        "## Live Summary\n\nWaiting for transcription..."
-    )
-    emit('summary_update', {'summary': summary})
-
-
-def answer_question(question):
     """
-    Stub: answer user question in Markdown.
-    Distinguish between STT-based and internet-based answers.
+    When a client connects, send whatever transcript we have so far.
     """
-    # Use STT context for a concise answer
-    stt_part = f"**Answer from STT Summary:**  \nBased on the lesson transcript, here's a focused answer to your question: *{question}*\n\n"
-    internet_part = "**Answer from Internet:**  \nThis section provides additional context or examples sourced from online resources."
-    return stt_part + internet_part
+    vid = 'sample_lesson'
+    entries = transcript_store.get(vid, [])
+    if entries:
+        full_md = "\n\n".join(f"- {e['text']}" for e in entries)
+    else:
+        full_md = "Welcome to CoTeacher. Awaiting transcription..."
+    emit('summary_update', {'summary': full_md})
+
+@socketio.on('time_update')
+def handle_time_update(data):
+    """
+    Client sends {'video_id': str, 'time': float}.
+    Server finds latest chunk <= time and emits it back.
+    """
+    vid  = data.get('video_id')
+    now  = data.get('time', 0.0)
+    segment = None
+    for entry in transcript_store.get(vid, []):
+        if entry['time'] <= now:
+            segment = entry
+        else:
+            break
+    if segment:
+        emit('transcript_segment', {
+            'time': segment['time'],
+            'text': segment['text']
+        })
 
 @socketio.on('chat_message')
 def handle_chat(data):
+    """
+    Very simple chat stub that distinguishes STT-based vs Internet-based.
+    """
     question = data.get('question', '').strip()
     if not question:
         return
-    answer = answer_question(question)
-    emit('chat_response', {'question': question, 'answer': answer}, broadcast=True)
+
+    # STT-based snippet: find last transcript containing first keyword
+    keyword = question.split()[0].lower()
+    stt_part = next(
+        (e['text'] for e in reversed(transcript_store['sample_lesson'])
+         if keyword in e['text'].lower()),
+        "(no matching STT snippet)"
+    )
+
+    internet_ans = "(example internet-based answer)"
+    answer_md = (
+        f"**[STT-based]:** {stt_part}\n\n"
+        f"**[Internet-based]:** {internet_ans}"
+    )
+
+    emit('chat_response', {
+        'question': question,
+        'answer': answer_md
+    }, broadcast=True)
 
 if __name__ == '__main__':
-    # Start the summary thread in daemon mode
+    # Start the background transcription loop
     threading.Thread(target=update_summary_loop, daemon=True).start()
     socketio.run(app, debug=True)
