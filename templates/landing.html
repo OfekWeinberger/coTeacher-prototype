@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to CoTeacher</title>
+    <!-- Add defer to TailwindCSS to ensure it loads after the page -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <style>
+        /* Basic styles that work without Tailwind */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #fff3e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255,255,255,0.9);
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            animation: fadeIn 1.5s ease-in;
+        }
+        .logo {
+            max-width: 256px;
+            height: auto;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 1rem 0;
+        }
+        p {
+            font-size: 1.25rem;
+            color: #4a4a4a;
+            max-width: 32rem;
+            margin: 1rem auto;
+        }
+        .enter-button {
+            display: inline-block;
+            background: #f97316;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background-color 0.3s;
+        }
+        .enter-button:hover {
+            background: #ea580c;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="/static/logo.png" alt="CoTeacher Logo" class="logo">
+        <h1>Welcome to CoTeacher</h1>
+        <p>
+            Your AI-powered teaching assistant for enhanced learning experiences
+        </p>
+        <a href="/app" class="enter-button">
+            Enter Application
+        </a>
+    </div>
+
+    <!-- Debug info -->
+    <script>
+        window.addEventListener('load', () => {
+            console.log('Page loaded successfully');
+            // Log if logo fails to load
+            const logo = document.querySelector('img');
+            logo.onerror = () => {
+                console.error('Failed to load logo image');
+                // Show alt text if image fails
+                logo.style.padding = '2rem';
+                logo.style.border = '2px dashed #ccc';
+            };
+        });
+    </script>
+</body>
+</html> 

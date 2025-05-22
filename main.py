@@ -27,7 +27,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "1:52",
-        "summary": "Boundedness ensures the function doesn’t go to infinity within the interval. This makes the concept of area well-defined. We recognize we don’t yet know how to calculate areas under curves that don’t resemble familiar shapes like rectangles or circles."
+        "summary": "Boundedness ensures the function doesn't go to infinity within the interval. This makes the concept of area well-defined. We recognize we don't yet know how to calculate areas under curves that don't resemble familiar shapes like rectangles or circles."
     },
     {
         "timestamp": "3:03",
@@ -55,7 +55,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "9:13",
-        "summary": "We clarify that this sum is an approximation of the area under the graph. By taking more rectangles, we approach a better result, but we still don’t reach the exact value—unless we use a **limit**."
+        "summary": "We clarify that this sum is an approximation of the area under the graph. By taking more rectangles, we approach a better result, but we still don't reach the exact value—unless we use a **limit**."
     },
     {
         "timestamp": "10:10",
@@ -63,7 +63,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "11:03",
-        "summary": "However, simply taking $n \\to \\infty$ isn’t precise enough. We must ensure the **entire interval** is refined—not just one part—to capture the correct limiting behavior."
+        "summary": "However, simply taking $n \\to \\infty$ isn't precise enough. We must ensure the **entire interval** is refined—not just one part—to capture the correct limiting behavior."
     },
     {
         "timestamp": "12:00",
@@ -83,7 +83,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "17:10",
-        "summary": "The function $f$ is **Riemann integrable** on $[a, b]$ if the Riemann sums converge to the same value $I$, no matter which $c_i$’s are chosen, as the partition gets finer."
+        "summary": "The function $f$ is **Riemann integrable** on $[a, b]$ if the Riemann sums converge to the same value $I$, no matter which $c_i$'s are chosen, as the partition gets finer."
     },
     {
         "timestamp": "18:19",
@@ -91,7 +91,7 @@ SUMMARY_DATA = [
     },
     {
         "timestamp": "20:20",
-        "summary": "This inequality must hold for **any** partition and **any** choice of $c_i$’s. This completes the rigorous definition of **Riemann integrability**."
+        "summary": "This inequality must hold for **any** partition and **any** choice of $c_i$'s. This completes the rigorous definition of **Riemann integrability**."
     },
     {
         "timestamp": "22:03",
@@ -100,7 +100,11 @@ SUMMARY_DATA = [
 ]
 
 @app.route("/")
-def index():
+def landing():
+    return render_template("landing.html")
+
+@app.route("/app")
+def app_page():
     return render_template("index.html", summary_data=SUMMARY_DATA)
 
 @app.route('/static/<path:filename>')
@@ -112,7 +116,7 @@ def transcribe_audio_stub():
     Stub generator: yields (timestamp_sec, text) pairs.
     """
     sample = [
-        (0.0,  "Welcome to CoTeacher’s calculus lesson."),
+        (0.0,  "Welcome to CoTeacher's calculus lesson."),
         (5.0,  "First, we define the derivative."),
         (10.0, "The derivative is f'(x) = \\(\\lim_{h \\to 0} \\frac{f(x+h)-f(x)}{h}\\)."),
         (20.0, "Next topic: integration as the inverse process."),
@@ -128,7 +132,7 @@ def update_summary_loop():
         # Now transcript_store[vid] exists
         transcript_store[vid].append({'time': ts, 'text': chunk})
 
-        # Emit the full “live summary” as a markdown list
+        # Emit the full "live summary" as a markdown list
         full_md = "\n\n".join(f"- {entry['text']}" for entry in transcript_store[vid])
         socketio.emit('summary_update', {'summary': full_md})
 
