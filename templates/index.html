@@ -159,7 +159,7 @@
     const video = document.getElementById('video');
     video.addEventListener('loadedmetadata', () => updateSummaryForTime(0));
     video.addEventListener('timeupdate',    () => updateSummaryForTime(video.currentTime));
-    video.addEventListener('seeked',         () => updateSummaryForTime(video.currentTime));
+    // video.addEventListener('seeked',         () => updateSummaryForTime(video.currentTime));
 
     // Chat code (unchanged)
     const socket = io();
@@ -175,9 +175,17 @@
     function askQuestion() {
       const q = document.getElementById('user-input').value.trim();
       if (!q) return;
-      socket.emit('chat_message', { question: q });
+      socket.emit('chat_message', { question: q,  currSec: document.getElementById('video').currentTime});
       document.getElementById('user-input').value = '';
     }
+    // Trigger askQuestion() when Enter key is pressed in the input field
+    document.getElementById('user-input').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();  // Prevent form submission or unwanted behavior
+        askQuestion();
+      }
+    });
+
   </script>
 </body>
 </html>
