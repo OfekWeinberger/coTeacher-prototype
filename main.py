@@ -4,7 +4,7 @@ eventlet.monkey_patch()  # must come first
 
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
-import threading, time
+import threading, time, csv
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -115,63 +115,36 @@ def app_page():
 def static_files(filename):
     return send_from_directory('static', filename)
 
-def transcribe_audio_stub():
-    """
-    Stub generator: yields (timestamp_sec, text) pairs.
-    """
-    sample = [
-        (0.0,  "Welcome to CoTeacher's calculus lesson."),
-        (5.0,  "First, we define the derivative."),
-        (10.0, "The derivative is f'(x) = \\(\\lim_{h \\to 0} \\frac{f(x+h)-f(x)}{h}\\)."),
-        (20.0, "Next topic: integration as the inverse process."),
-        (30.0, "Example: integrate 2x to get x² + C.")
-    ]
-    for ts, txt in sample:
-        time.sleep(4)
-        yield ts, txt
+def load_csv_to_variable(filepath):
+    with open(filepath, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        data = [row for row in reader]
+    return data
 
-def update_summary_loop():
-    vid = 'sample_lesson'
-    for ts, chunk in transcribe_audio_stub():
-        # Now transcript_store[vid] exists
-        transcript_store[vid].append({'time': ts, 'text': chunk})
+# Path to your CSV file
+filepath = r"sample video.csv"
 
-        # Emit the full "live summary" as a markdown list
-        full_md = "\n\n".join(f"- {entry['text']}" for entry in transcript_store[vid])
-        socketio.emit('summary_update', {'summary': full_md})
+# Load CSV contents into a variable
+TRANSCRIPT = load_csv_to_variable(filepath)
 
-@socketio.on('connect')
-def on_connect():
+def get_text_before_time(time_seconds):
     """
-    When a client connects, send whatever transcript we have so far.
+    Return all transcript text segments ending before or at time_seconds (in seconds).
+    
+    :param time_seconds: float or int, time in seconds
+    :return: str, concatenated transcript text before or at time_seconds
     """
-    vid = 'sample_lesson'
-    entries = transcript_store.get(vid, [])
-    if entries:
-        full_md = "\n\n".join(f"- {e['text']}" for e in entries)
-    else:
-        full_md = "Welcome to CoTeacher. Awaiting transcription..."
-    emit('summary_update', {'summary': full_md})
-
-@socketio.on('time_update')
-def handle_time_update(data):
-    """
-    Client sends {'video_id': str, 'time': float}.
-    Server finds latest chunk <= time and emits it back.
-    """
-    vid  = data.get('video_id')
-    now  = data.get('time', 0.0)
-    segment = None
-    for entry in transcript_store.get(vid, []):
-        if entry['time'] <= now:
-            segment = entry
+    time_ms = int(time_seconds * 1000)  # convert seconds to milliseconds
+    parts = []
+    for entry in TRANSCRIPT:
+        end_time = int(entry['end'])
+        if end_time <= time_ms:
+            parts.append(entry['text'].strip())
         else:
-            break
-    if segment:
-        emit('transcript_segment', {
-            'time': segment['time'],
-            'text': segment['text']
-        })
+            break  # assuming TRANSCRIPT is sorted by end time ascending
+    
+    return " ".join(parts)
+
 
 @socketio.on('chat_message')
 def handle_chat(data):
@@ -179,9 +152,12 @@ def handle_chat(data):
     Very simple chat stub that distinguishes STT-based vs Internet-based.
     """
     question = data.get('question', '').strip()
+    currSec = data.get('currSec', '')
     if not question:
         return
-
+    context = get_text_before_time(currSec)
+    general_prompt = f"Given this context, please provide an answer to this question. they are seperated by $$$. context: {context} $$$ question: {question}"
+    print(general_prompt)
     # STT-based snippet: find last transcript containing first keyword
     keyword = question.split()[0].lower()
     stt_part = next(
@@ -203,5 +179,4 @@ def handle_chat(data):
 
 if __name__ == '__main__':
     # Start the background transcription loop
-    threading.Thread(target=update_summary_loop, daemon=True).start()
     socketio.run(app, debug=True)
