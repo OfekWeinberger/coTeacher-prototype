@@ -44,8 +44,8 @@
     }
     /* 1) Make left pane wider */
     #summary-panel { width: 30%; height: 100%; }
-    #video-panel   { flex: 1; height: 100%; }
-    #chat-panel    { width: 25%; height: 100%; }
+    #video-panel   { flex: 1; height: 100%; display: flex; align-items: flex-start; justify-content: top; }
+    #chat-panel    { width: 30%; height: 100%; }
 
     .markdown-body {
       padding: 0.5rem;
@@ -66,8 +66,8 @@
     </div>
 
     <!-- Video panel -->
-    <div id="video-panel" class="panel p-4 flex items-center justify-center">
-      <video id="video" controls class="rounded-2xl shadow-lg w-full h-auto max-h-[90vh]">
+    <div id="video-panel" class="panel p-4 flex">
+      <video id="video" controls autoplay muted class="rounded-2xl shadow-lg w-full h-auto max-h-[90vh]">
         <source src="/static/sample_video.mp4" type="video/mp4">
       </video>
     </div>
@@ -97,12 +97,14 @@
       return m*60 + s;
     }
 
-    // Typewriter helper: plain-text then render final markdown+math
+    // Typewriter helper: render markdown+math as you type
     function typeWriter(text, element, cb) {
       let i = 0;
-      element.textContent = '';
+      element.innerHTML = '';
       const interval = setInterval(() => {
-        element.textContent += text.charAt(i);
+        const current = text.slice(0, i + 1);
+        element.innerHTML = marked.parse(current);
+        MathJax.typesetPromise([element]).catch(() => {});
         i++;
         if (i >= text.length) {
           clearInterval(interval);
@@ -164,19 +166,41 @@
     // Chat code (unchanged)
     const socket = io();
     const chatLog = document.getElementById('chat-log');
+    let loadingMsg = null;
+
     socket.on('chat_response', data => {
+      // Remove loading message if present
+      if (loadingMsg && loadingMsg.parentNode) {
+        loadingMsg.parentNode.removeChild(loadingMsg);
+        loadingMsg = null;
+      }
+
       const msg = document.createElement('div');
       msg.className = 'mb-4';
-      msg.innerHTML = marked.parse(`**You:** ${data.question}\n\n**ac.tive:** ${data.answer}`);
       chatLog.appendChild(msg);
-      MathJax.typesetPromise([msg]).catch(console.error);
+
+      // Prepare plain text for typewriter
+      const raw = `You: ${data.question}\n\nac.tive: ${data.answer}`;
+      typeWriter(raw, msg, () => {
+        // After typing, render markdown + math
+        msg.innerHTML = marked.parse(`**You:** ${data.question}\n\n**ac.tive:** ${data.answer}`);
+        MathJax.typesetPromise([msg]).catch(console.error);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      });
       chatLog.scrollTop = chatLog.scrollHeight;
     });
     function askQuestion() {
       const q = document.getElementById('user-input').value.trim();
       if (!q) return;
-      socket.emit('chat_message', { question: q,  currSec: document.getElementById('video').currentTime});
+      socket.emit('chat_message', { question: q, currSec: document.getElementById('video').currentTime });
       document.getElementById('user-input').value = '';
+
+      // Add loading message
+      loadingMsg = document.createElement('div');
+      loadingMsg.className = 'mb-4 text-gray-500 italic';
+      loadingMsg.textContent = 'ac.tive is typing...';
+      chatLog.appendChild(loadingMsg);
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
     // Trigger askQuestion() when Enter key is pressed in the input field
     document.getElementById('user-input').addEventListener('keydown', function(event) {

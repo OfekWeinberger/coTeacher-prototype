@@ -5,6 +5,7 @@ eventlet.monkey_patch()  # must come first
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 import threading, time, csv
+from prompt_maker import send_prompt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -139,7 +140,7 @@ def get_text_before_time(time_seconds):
     for entry in TRANSCRIPT:
         end_time = int(entry['end'])
         if end_time <= time_ms:
-            parts.append(entry['text'].strip())
+            parts.append(str(entry))
         else:
             break  # assuming TRANSCRIPT is sorted by end time ascending
     
@@ -156,21 +157,8 @@ def handle_chat(data):
     if not question:
         return
     context = get_text_before_time(currSec)
-    general_prompt = f"Given this context, please provide an answer to this question. they are seperated by $$$. context: {context} $$$ question: {question}"
-    print(general_prompt)
-    # STT-based snippet: find last transcript containing first keyword
-    keyword = question.split()[0].lower()
-    stt_part = next(
-        (e['text'] for e in reversed(transcript_store['sample_lesson'])
-         if keyword in e['text'].lower()),
-        "(no matching STT snippet)"
-    )
-
-    internet_ans = "(example internet-based answer)"
-    answer_md = (
-        f"**[STT-based]:** {stt_part}\n\n"
-        f"**[Internet-based]:** {internet_ans}"
-    )
+    prompt = f"transcript: {context} $$$ question: {question}"
+    answer_md = send_prompt(prompt)
 
     emit('chat_response', {
         'question': question,
