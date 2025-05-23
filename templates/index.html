@@ -216,7 +216,7 @@
     </div>
     <div class="menu-item" onclick="toggleSubmenu('minigames-submenu', event)">Minigames</div>
     <div id="minigames-submenu" class="submenu">
-      <div class="menu-item" onclick="open2048Game()">2048</div>
+    <div class="menu-item" onclick="toggle2048Game()">2048</div>
     </div>
     <div class="menu-item" onclick="toggleSubmenu('quiz-submenu', event)">Quiz</div>
     <div id="quiz-submenu" class="submenu">
@@ -547,6 +547,20 @@ function open2048Game() {
   createBoard();
   document.removeEventListener("keydown", handleKey);
   document.addEventListener("keydown", handleKey);
+}
+</script>
+<script>
+// must come after open2048Game()
+function toggle2048Game() {
+  const grid = document.querySelector('.game-2048-box');
+  if (grid.style.display === 'grid') {
+    // if it’s visible, hide it
+    grid.style.display = 'none';
+    document.removeEventListener('keydown', handleKey);
+  } else {
+    // if hidden, re-open/reset
+    open2048Game();
+  }
 }
 </script>
 </body>
