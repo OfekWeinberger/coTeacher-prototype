@@ -88,6 +88,44 @@
             height: 1.5rem;
             margin-right: 0.75rem;
         }
+        .plus-btn {
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.5rem;
+            line-height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .plus-btn:hover {
+            background: #047857;
+        }
+        .dropdown-menu {
+            min-width: 10rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .dropdown-item {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #059669;
+            border-radius: 0.25rem;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover {
+            background: #f0fdf4;
+        }
     </style>
 </head>
 <body class="p-6">
@@ -102,11 +140,20 @@
     <div class="max-w-4xl mx-auto fade-in">
         <!-- Data Structures -->
         <div class="course-section">
-            <div class="course-header" onclick="toggleCourse(this)">
-                <h2 class="text-xl font-semibold text-gray-800">Data Structures</h2>
-                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+            <div class="course-header flex items-center justify-between">
+                <div class="flex items-center gap-2 flex-1 cursor-pointer" onclick="toggleCourse(this.parentElement)">
+                    <h2 class="text-xl font-semibold text-gray-800">Data Structures</h2>
+                </div>
+                <div class="relative flex items-center">
+                    <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white rounded shadow-lg z-10">
+                        <button class="dropdown-item" onclick="event.stopPropagation(); alert('Import Lists clicked')">Import Lists</button>
+                        <button class="dropdown-item" onclick="event.stopPropagation(); alert('Import Presentation clicked')">Import Presentation</button>
+                    </div>
+                    <svg class="chevron ml-2 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        onclick="event.stopPropagation(); toggleCourse(this.closest('.course-header'));">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
             </div>
             <div class="course-content">
                 <a href="#" class="lesson-link">Lecture #1 - Introduction to Data Structures</a>
@@ -173,9 +220,15 @@
         <div class="course-section">
             <div class="course-header" onclick="toggleCourse(this)">
                 <h2 class="text-xl font-semibold text-gray-800">Calculus</h2>
-                <svg class="chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
+                <div class="relative flex items-center">
+                    <div class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white rounded shadow-lg z-10">
+                        <button class="dropdown-item" onclick="event.stopPropagation(); alert('Import Lists clicked')">Import Lists</button>
+                        <button class="dropdown-item" onclick="event.stopPropagation(); alert('Import Presentation clicked')">Import Presentation</button>
+                    </div>
+                    <svg class="chevron ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
             </div>
             <div class="course-content">
                 <a href="#" class="lesson-link">Lecture #1 - Introduction to Limits</a>
@@ -203,6 +256,22 @@
             content.classList.toggle('active');
         }
 
+        function toggleDropdown(btn) {
+            const menu = btn.nextElementSibling;
+            menu.classList.toggle('hidden');
+            // Close others
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+        }
+
+        // Optional: Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        });
+
         // Open Calculus section by default
         document.addEventListener('DOMContentLoaded', () => {
             const calculus = document.querySelector('.course-section:last-child');
@@ -213,4 +282,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
