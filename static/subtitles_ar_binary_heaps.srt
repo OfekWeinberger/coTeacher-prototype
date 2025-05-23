@@ -1,0 +1,2852 @@
+1
+00:00:05,960 --> 00:00:15,020
+حسنًا، أهلًا بعودتكم إلى هياكل البيانات 006.
+
+2
+00:00:15,960 --> 00:00:19,260
+اليوم سنتناول نوعًا مختلفًا
+
+3
+00:00:19,260 --> 00:00:21,760
+من بنية بيانات تشبه الشجرة وتسمى "هيب"
+
+4
+00:00:22,100 --> 00:00:22,720
+الهيب الثنائي.
+
+5
+00:00:22,840 --> 00:00:24,980
+سيمكننا هذا من حل مشكلات الفرز
+
+6
+00:00:24,980 --> 00:00:25,840
+بطريقة جديدة.
+
+7
+00:00:26,620 --> 00:00:30,340
+دعوني أذكّركم أولًا بجزء معين.
+
+8
+00:00:30,660 --> 00:00:31,920
+المشكلة التي سنحلها اليوم
+
+9
+00:00:31,920 --> 00:00:33,120
+تُسمى "طابور الأولويات".
+
+10
+00:00:33,540 --> 00:00:34,560
+هذه هي الواجهة.
+
+11
+00:00:34,560 --> 00:00:36,760
+[AR] We'll see several data structures, but one main
+
+12
+00:00:36,760 --> 00:00:37,840
+[AR] data structure for today.
+
+13
+00:00:39,620 --> 00:00:43,960
+[AR] And this is a subset of the set
+
+14
+00:00:43,960 --> 00:00:44,500
+[AR] interface.
+
+15
+00:00:47,320 --> 00:00:49,540
+[AR] And subsets are interesting because potentially we can
+
+16
+00:00:49,540 --> 00:00:51,960
+[AR] solve them better, faster, simpler, something.
+
+17
+00:00:53,860 --> 00:00:58,040
+[AR] And so you'll recognize, you should recognize all
+
+18
+00:00:58,040 --> 00:01:00,980
+[AR] of these operations, except we didn't normally highlight
+
+19
+00:01:00,980 --> 00:01:02,320
+[AR] the max operation.
+
+20
+00:01:02,760 --> 00:01:04,760
+[AR] So here we're interested in storing a bunch
+
+21
+00:01:04,760 --> 00:01:05,300
+[AR] of items.
+
+22
+00:01:05,300 --> 00:01:08,920
+[AR] They have keys, which we think of as
+
+23
+00:01:08,920 --> 00:01:09,440
+[AR] priorities.
+
+24
+00:01:10,140 --> 00:01:11,940
+[AR] And we want to be able to identify
+
+25
+00:01:11,940 --> 00:01:16,040
+[AR] the maximum priority item in our set and
+
+26
+00:01:16,040 --> 00:01:16,580
+[AR] remove it.
+
+27
+00:01:17,460 --> 00:01:19,060
+[AR] And so there's lots of motivations for this.
+
+28
+00:01:19,140 --> 00:01:20,820
+[AR] Maybe you have a router, packets going into
+
+29
+00:01:20,820 --> 00:01:22,740
+[AR] the router, they have different priorities assigned to
+
+30
+00:01:22,740 --> 00:01:24,160
+[AR] them, you want to route the highest priority
+
+31
+00:01:24,160 --> 00:01:24,620
+[AR] first.
+
+32
+00:01:25,040 --> 00:01:28,060
+[AR] Or you have processes on your computer trying
+
+33
+00:01:28,060 --> 00:01:32,280
+[AR] to run on your single-threaded, single core,
+
+34
+00:01:32,560 --> 00:01:33,820
+[AR] and you've got to choose which one to
+
+35
+00:01:33,820 --> 00:01:36,280
+[AR] run next, and you usually run higher priority
+
+36
+00:01:36,280 --> 00:01:37,220
+[AR] processes first.
+
+37
+00:01:37,700 --> 00:01:41,980
+[AR] Or you're trying to simulate a system where
+
+38
+00:01:41,980 --> 00:01:44,040
+[AR] events happen at different times, and you want
+
+39
+00:01:44,040 --> 00:01:46,820
+[AR] to process the next event ordered by time.
+
+40
+00:01:46,920 --> 00:01:49,400
+[AR] All of these are examples of the priority
+
+41
+00:01:49,400 --> 00:01:50,220
+[AR] queue interface.
+
+42
+00:01:50,220 --> 00:01:52,460
+[AR] We'll even see applications within this class when
+
+43
+00:01:52,460 --> 00:01:53,380
+[AR] we get to graph algorithms.
+
+44
+00:01:53,980 --> 00:01:56,000
+[AR] But the main two things we want to
+
+45
+00:01:56,000 --> 00:01:57,620
+[AR] be able to support are inserting an item,
+
+46
+00:01:57,680 --> 00:02:00,300
+[AR] which includes a key, and deleting the maximum
+
+47
+00:02:00,300 --> 00:02:02,300
+[AR] item, and also returning it at the same
+
+48
+00:02:02,300 --> 00:02:02,600
+[AR] time.
+
+49
+00:02:03,380 --> 00:02:06,460
+[AR] We'll also talk some about being able to
+
+50
+00:02:06,460 --> 00:02:09,000
+[AR] build the structure faster than just inserting it.
+
+51
+00:02:09,039 --> 00:02:11,100
+[AR] But of course we could implement build by
+
+52
+00:02:11,100 --> 00:02:13,340
+[AR] starting empty and repeatedly inserting.
+
+53
+00:02:14,100 --> 00:02:17,220
+[AR] And also the complexity of just finding the
+
+54
+00:02:17,220 --> 00:02:18,300
+[AR] max without deleting it.
+
+55
+00:02:18,660 --> 00:02:20,760
+[AR] This you could simulate with these two operations
+
+56
+00:02:20,760 --> 00:02:22,800
+[AR] by deleting the max and then reinserting it.
+
+57
+00:02:24,040 --> 00:02:25,240
+[AR] Which works.
+
+58
+00:02:25,700 --> 00:02:27,260
+[AR] But often we can do faster.
+
+59
+00:02:28,000 --> 00:02:31,160
+[AR] But the two key main operations are insert
+
+60
+00:02:31,160 --> 00:02:32,300
+[AR] and delete max.
+
+61
+00:02:32,480 --> 00:02:34,980
+[AR] And we're going to see a few data
+
+62
+00:02:34,980 --> 00:02:36,120
+[AR] structures to do this.
+
+63
+00:02:37,100 --> 00:02:39,980
+[AR] Any suggestions among the data structures we've seen
+
+64
+00:02:39,980 --> 00:02:40,560
+[AR] in this class?
+
+65
+00:02:40,680 --> 00:02:44,560
+[AR] What should we use to solve priority queue
+
+66
+00:02:44,560 --> 00:02:45,000
+[AR] interface?
+
+67
+00:02:50,360 --> 00:02:54,760
+[AR] Many possible answers.
+
+68
+00:02:59,030 --> 00:02:59,770
+[AR] Sequence AVL.
+
+69
+00:02:59,850 --> 00:03:00,590
+[AR] Oh, that's interesting.
+
+70
+00:03:01,370 --> 00:03:03,010
+[AR] Sequence AVL is a good answer.
+
+71
+00:03:03,450 --> 00:03:05,890
+[AR] But it's maybe the fancier version.
+
+72
+00:03:06,950 --> 00:03:07,230
+[AR] Yeah.
+
+73
+00:03:08,550 --> 00:03:09,610
+[AR] Set AVL.
+
+74
+00:03:09,990 --> 00:03:10,290
+[AR] Sounds good.
+
+75
+00:03:10,850 --> 00:03:13,630
+[AR] Set AVL supports these operations and many more.
+
+76
+00:03:13,970 --> 00:03:16,010
+[AR] All in log n time, except for build,
+
+77
+00:03:16,090 --> 00:03:18,110
+[AR] which takes n log n time.
+
+78
+00:03:18,170 --> 00:03:19,330
+[AR] Because you have to sort first.
+
+79
+00:03:20,870 --> 00:03:22,870
+[AR] So set AVL is a good way to
+
+80
+00:03:22,870 --> 00:03:23,130
+[AR] do this.
+
+81
+00:03:23,250 --> 00:03:25,810
+[AR] We'll come back to your sequence AVL idea
+
+82
+00:03:25,810 --> 00:03:26,130
+[AR] later.
+
+83
+00:03:27,530 --> 00:03:30,710
+[AR] This gets log n for operation.
+
+84
+00:03:31,770 --> 00:03:31,930
+[AR] Great.
+
+85
+00:03:32,150 --> 00:03:34,670
+[AR] I mean, set AVL is our most powerful
+
+86
+00:03:34,670 --> 00:03:35,170
+[AR] data structure.
+
+87
+00:03:35,290 --> 00:03:36,730
+[AR] It does all the operations we care about.
+
+88
+00:03:37,550 --> 00:03:38,490
+[AR] On the set side.
+
+89
+00:03:38,590 --> 00:03:40,090
+[AR] And the sequence AVL does all the operations
+
+90
+00:03:40,090 --> 00:03:40,770
+[AR] on the sequence side.
+
+91
+00:03:40,830 --> 00:03:42,190
+[AR] But note that this is a set, not
+
+92
+00:03:42,190 --> 00:03:42,710
+[AR] a sequence.
+
+93
+00:03:42,950 --> 00:03:43,970
+[AR] We care about keys.
+
+94
+00:03:44,490 --> 00:03:45,790
+[AR] There are hacks to get around that with
+
+95
+00:03:45,790 --> 00:03:46,570
+[AR] sequence AVLs.
+
+96
+00:03:46,630 --> 00:03:47,890
+[AR] But let's do that later.
+
+97
+00:03:50,110 --> 00:03:50,650
+[AR] So great.
+
+98
+00:03:50,650 --> 00:03:53,230
+[AR] If we wanted to, for example, speed up
+
+99
+00:03:53,230 --> 00:03:56,310
+[AR] find max in a set AVL, we could
+
+100
+00:03:56,310 --> 00:03:57,730
+[AR] add augmentation.
+
+101
+00:03:58,530 --> 00:04:04,490
+[AR] We could remember subtree property augmentations.
+
+102
+00:04:05,170 --> 00:04:07,830
+[AR] We can use that to get constant time
+
+103
+00:04:07,830 --> 00:04:12,610
+[AR] find max by storing in every node the
+
+104
+00:04:12,610 --> 00:04:15,029
+[AR] maximum key item within the subtree.
+
+105
+00:04:15,450 --> 00:04:16,630
+[AR] And that's a subtree property.
+
+106
+00:04:16,690 --> 00:04:18,529
+[AR] It's one we mentioned last class.
+
+107
+00:04:18,529 --> 00:04:20,750
+[AR] So we could even improve that to constant
+
+108
+00:04:20,750 --> 00:04:21,010
+[AR] time.
+
+109
+00:04:21,330 --> 00:04:21,490
+[AR] Great.
+
+110
+00:04:22,430 --> 00:04:23,390
+[AR] So we're done.
+
+111
+00:04:23,510 --> 00:04:24,030
+[AR] End of lecture.
+
+112
+00:04:24,690 --> 00:04:26,450
+[AR] In some sense, that's true.
+
+113
+00:04:26,810 --> 00:04:28,850
+[AR] But what we're going to see today is
+
+114
+00:04:28,850 --> 00:04:30,850
+[AR] another data structure called a binary heap, which
+
+115
+00:04:30,850 --> 00:04:33,950
+[AR] is, in some sense, a simplification of set
+
+116
+00:04:33,950 --> 00:04:34,430
+[AR] AVL.
+
+117
+00:04:34,750 --> 00:04:37,350
+[AR] It achieves basically the same time bounds.
+
+118
+00:04:37,530 --> 00:04:40,270
+[AR] Build will be faster by a log factor.
+
+119
+00:04:41,190 --> 00:04:43,710
+[AR] But that's not the main reason we care
+
+120
+00:04:43,710 --> 00:04:44,110
+[AR] about them.
+
+121
+00:04:44,510 --> 00:04:46,250
+[AR] The main advantage is that they're simpler.
+
+122
+00:04:46,890 --> 00:04:50,050
+[AR] And they give us an in-place sorting
+
+123
+00:04:50,050 --> 00:04:50,450
+[AR] algorithm.
+
+124
+00:04:53,990 --> 00:04:57,510
+[AR] So I have up here the three of
+
+125
+00:04:57,510 --> 00:04:59,490
+[AR] the operations I've been talking about, build, insert,
+
+126
+00:04:59,630 --> 00:05:00,390
+[AR] and delete max.
+
+127
+00:05:00,870 --> 00:05:03,390
+[AR] So we have set AVL, trees there, n
+
+128
+00:05:03,390 --> 00:05:05,770
+[AR] log n build, log n insert, log n
+
+129
+00:05:05,770 --> 00:05:06,090
+[AR] delete.
+
+130
+00:05:06,970 --> 00:05:10,110
+[AR] So along the way to our heap, I
+
+131
+00:05:10,110 --> 00:05:12,650
+[AR] want to mention two other data structures.
+
+132
+00:05:13,370 --> 00:05:17,350
+[AR] One is a dynamic but unsorted array.
+
+133
+00:05:17,890 --> 00:05:20,170
+[AR] And the other is a dynamic sorted array.
+
+134
+00:05:25,520 --> 00:05:28,080
+[AR] These are simpler data structures we've talked about
+
+135
+00:05:28,080 --> 00:05:29,000
+[AR] many times before.
+
+136
+00:05:29,180 --> 00:05:32,200
+[AR] And they're useful motivations for getting started.
+
+137
+00:05:32,260 --> 00:05:34,660
+[AR] Because a heap is going to be built
+
+138
+00:05:34,660 --> 00:05:39,080
+[AR] on top of arrays instead of a fusion
+
+139
+00:05:39,080 --> 00:05:40,520
+[AR] between arrays and trees.
+
+140
+00:05:43,480 --> 00:05:46,560
+[AR] So if I have an unsorted array, this
+
+141
+00:05:46,560 --> 00:05:48,280
+[AR] is very easy to insert into.
+
+142
+00:05:48,840 --> 00:05:51,380
+[AR] I just append to the end.
+
+143
+00:05:51,380 --> 00:05:53,100
+[AR] This is what we called insert last.
+
+144
+00:05:53,580 --> 00:05:57,900
+[AR] So insert is fast, constant amortized.
+
+145
+00:05:58,700 --> 00:06:00,000
+[AR] We might have to resize the array.
+
+146
+00:06:00,400 --> 00:06:01,760
+[AR] So that's the amortized part.
+
+147
+00:06:02,320 --> 00:06:04,420
+[AR] But delete max is slow in an unsorted
+
+148
+00:06:04,420 --> 00:06:04,720
+[AR] array.
+
+149
+00:06:04,800 --> 00:06:05,860
+[AR] I don't know where the maximum is.
+
+150
+00:06:05,900 --> 00:06:07,340
+[AR] So I have to scan through the whole
+
+151
+00:06:07,340 --> 00:06:07,640
+[AR] array.
+
+152
+00:06:10,870 --> 00:06:13,310
+[AR] So I scan through the array, identify the
+
+153
+00:06:13,310 --> 00:06:14,390
+[AR] max is somewhere in the middle.
+
+154
+00:06:15,250 --> 00:06:16,910
+[AR] And then if I want to delete it,
+
+155
+00:06:22,670 --> 00:06:24,410
+[AR] I want to delete that maximum element.
+
+156
+00:06:24,510 --> 00:06:25,930
+[AR] Well, in a dynamic array, all I can
+
+157
+00:06:25,930 --> 00:06:28,370
+[AR] really do is delete the last element efficiently.
+
+158
+00:06:28,710 --> 00:06:31,030
+[AR] So I could, for example, swap it with
+
+159
+00:06:31,030 --> 00:06:33,130
+[AR] the last element.
+
+160
+00:06:33,450 --> 00:06:35,070
+[AR] So I take this element and put it
+
+161
+00:06:35,070 --> 00:06:38,150
+[AR] here, and then delete the last element in
+
+162
+00:06:38,150 --> 00:06:41,050
+[AR] that array, which is pop in Python, or
+
+163
+00:06:41,050 --> 00:06:42,810
+[AR] delete last in our world.
+
+164
+00:06:43,550 --> 00:06:48,130
+[AR] So overall, this is linear time, which is
+
+165
+00:06:48,130 --> 00:06:48,470
+[AR] bad.
+
+166
+00:06:49,990 --> 00:06:51,890
+[AR] But I wanted to highlight exactly how it's
+
+167
+00:06:51,890 --> 00:06:53,470
+[AR] done for a reason we'll get to in
+
+168
+00:06:53,470 --> 00:06:53,750
+[AR] a moment.
+
+169
+00:06:54,330 --> 00:06:55,950
+[AR] Sorted array is sort of the reverse.
+
+170
+00:06:56,230 --> 00:06:57,690
+[AR] It's very easy to find the max.
+
+171
+00:06:58,110 --> 00:06:58,810
+[AR] Where is it?
+
+172
+00:07:01,090 --> 00:07:01,710
+[AR] At the end.
+
+173
+00:07:02,610 --> 00:07:03,150
+[AR] Delete max.
+
+174
+00:07:03,730 --> 00:07:06,030
+[AR] The maximum element is always the last element
+
+175
+00:07:06,030 --> 00:07:08,170
+[AR] in a increasing sorted array.
+
+176
+00:07:11,180 --> 00:07:13,980
+[AR] I guess that's constant amortized, because then I
+
+177
+00:07:13,980 --> 00:07:16,080
+[AR] have to delete it, which may incur resizing.
+
+178
+00:07:18,420 --> 00:07:22,920
+[AR] Insert, though, is going to be linear, because
+
+179
+00:07:22,920 --> 00:07:24,900
+[AR] maybe I can binary search to find where
+
+180
+00:07:24,900 --> 00:07:27,200
+[AR] the added item belongs.
+
+181
+00:07:28,060 --> 00:07:33,440
+[AR] Let's say I just added this item here.
+
+182
+00:07:35,080 --> 00:07:36,880
+[AR] I could binary search to find it, but
+
+183
+00:07:36,880 --> 00:07:37,960
+[AR] then I'm going to have to do a
+
+184
+00:07:37,960 --> 00:07:38,480
+[AR] big shift.
+
+185
+00:07:38,600 --> 00:07:40,880
+[AR] So I might as well just swap repeatedly
+
+186
+00:07:41,600 --> 00:07:44,700
+[AR] until I find the position where the added
+
+187
+00:07:44,700 --> 00:07:47,200
+[AR] item x belongs.
+
+188
+00:07:47,500 --> 00:07:49,020
+[AR] And now I've restored sorted order.
+
+189
+00:07:49,180 --> 00:07:51,780
+[AR] That takes linear time, which is bad.
+
+190
+00:07:52,180 --> 00:07:54,000
+[AR] And what we want is somehow the best
+
+191
+00:07:54,000 --> 00:07:55,080
+[AR] of these two worlds.
+
+192
+00:07:55,900 --> 00:07:57,620
+[AR] Insert is fast for array.
+
+193
+00:07:59,240 --> 00:08:01,020
+[AR] Delete is fast for a sorted array.
+
+194
+00:08:01,540 --> 00:08:03,540
+[AR] We can't get constant time for both, but
+
+195
+00:08:03,540 --> 00:08:04,880
+[AR] we can get log n time for both.
+
+196
+00:08:04,940 --> 00:08:07,700
+[AR] We already know how with set AVL trees.
+
+197
+00:08:07,860 --> 00:08:08,800
+[AR] But we're going to see a different way
+
+198
+00:08:08,800 --> 00:08:09,440
+[AR] to do it today.
+
+199
+00:08:10,680 --> 00:08:14,400
+[AR] And the main motivation for a different way
+
+200
+00:08:14,400 --> 00:08:17,420
+[AR] to do this is sorting.
+
+201
+00:08:18,280 --> 00:08:21,340
+[AR] So I want to define priority queue sort.
+
+202
+00:08:29,280 --> 00:08:32,580
+[AR] So given any data structure that implements a
+
+203
+00:08:32,580 --> 00:08:35,380
+[AR] priority queue interface, in particular, insert and delete
+
+204
+00:08:35,380 --> 00:08:37,720
+[AR] max, I can make a sorting algorithm.
+
+205
+00:08:38,080 --> 00:08:38,799
+[AR] What do I do?
+
+206
+00:08:39,220 --> 00:08:41,720
+[AR] Insert all the items, delete all the items.
+
+207
+00:08:42,240 --> 00:08:44,280
+[AR] But because when I delete them, they come
+
+208
+00:08:44,280 --> 00:08:46,900
+[AR] out largest first, I get them in reverse
+
+209
+00:08:46,900 --> 00:08:47,440
+[AR] sorted order.
+
+210
+00:08:47,600 --> 00:08:49,720
+[AR] Then I could reverse in linear time, and
+
+211
+00:08:49,720 --> 00:08:51,000
+[AR] I've sorted my items.
+
+212
+00:08:51,600 --> 00:08:58,440
+[AR] So we can insert x for x and
+
+213
+00:08:58,440 --> 00:09:07,500
+[AR] a, or build a, and then repeatedly
+
+214
+00:09:07,500 --> 00:09:09,600
+[AR] delete max.
+
+215
+00:09:16,920 --> 00:09:18,720
+[AR] How much time does this algorithm take?
+
+216
+00:09:19,400 --> 00:09:21,160
+[AR] I'm going to introduce some notation here.
+
+217
+00:09:21,300 --> 00:09:23,420
+[AR] It takes however long it takes to build
+
+218
+00:09:23,420 --> 00:09:24,040
+[AR] n items.
+
+219
+00:09:24,880 --> 00:09:28,500
+[AR] I'll call that t sub build of n
+
+220
+00:09:28,500 --> 00:09:40,780
+[AR] plus n times the
+
+221
+00:09:40,780 --> 00:09:42,040
+[AR] time to do a delete max.
+
+222
+00:09:45,570 --> 00:09:48,810
+[AR] Or we can write this as n times
+
+223
+00:09:48,810 --> 00:09:52,870
+[AR] time to do an insert plus time to
+
+224
+00:09:52,870 --> 00:09:53,630
+[AR] do a delete max.
+
+225
+00:09:58,070 --> 00:10:00,050
+[AR] So I'm using these t functions to just
+
+226
+00:10:00,050 --> 00:10:03,490
+[AR] abstract what are the running times provided by
+
+227
+00:10:03,490 --> 00:10:05,770
+[AR] my data structure that implements this interface.
+
+228
+00:10:06,070 --> 00:10:08,230
+[AR] Interface says what's correct is, and these t
+
+229
+00:10:08,230 --> 00:10:10,250
+[AR] functions give me my performance bounds.
+
+230
+00:10:10,770 --> 00:10:12,550
+[AR] So if I plug in each of these
+
+231
+00:10:12,550 --> 00:10:15,590
+[AR] data structures, I get a sorting algorithm.
+
+232
+00:10:16,550 --> 00:10:17,590
+[AR] I get AVL sort.
+
+233
+00:10:17,730 --> 00:10:18,710
+[AR] I get array sort.
+
+234
+00:10:18,830 --> 00:10:19,990
+[AR] I get assorted array sort.
+
+235
+00:10:20,210 --> 00:10:21,550
+[AR] What do those look like?
+
+236
+00:10:21,590 --> 00:10:23,190
+[AR] It turns out many of these are familiar.
+
+237
+00:10:25,910 --> 00:10:29,050
+[AR] So set AVLs take log n per operation.
+
+238
+00:10:29,470 --> 00:10:31,670
+[AR] So we get an n log n sorting
+
+239
+00:10:31,670 --> 00:10:34,690
+[AR] algorithm out of them, which is insert all
+
+240
+00:10:34,690 --> 00:10:36,330
+[AR] of the items into the AVL tree.
+
+241
+00:10:36,490 --> 00:10:38,250
+[AR] I don't want to use AVL build because
+
+242
+00:10:38,250 --> 00:10:39,330
+[AR] that uses sort.
+
+243
+00:10:39,610 --> 00:10:40,990
+[AR] I'm not allowed to sort in order to
+
+244
+00:10:40,990 --> 00:10:41,510
+[AR] implement sort.
+
+245
+00:10:42,030 --> 00:10:43,490
+[AR] But we saw how to insert into an
+
+246
+00:10:43,490 --> 00:10:45,050
+[AR] AVL tree and keep the thing balanced.
+
+247
+00:10:45,610 --> 00:10:47,050
+[AR] So that takes log n each.
+
+248
+00:10:47,450 --> 00:10:49,770
+[AR] And then we can find the max, delete
+
+249
+00:10:49,770 --> 00:10:51,350
+[AR] it, rebalance, and so on.
+
+250
+00:10:51,450 --> 00:10:52,670
+[AR] Total time will be n log n.
+
+251
+00:10:52,750 --> 00:10:54,430
+[AR] This is an algorithm we call AVL sort.
+
+252
+00:10:55,470 --> 00:10:57,610
+[AR] It's a bit complicated because AVL trees are
+
+253
+00:10:57,610 --> 00:10:57,990
+[AR] complicated.
+
+254
+00:10:57,990 --> 00:11:01,910
+[AR] But it gives us optimal comparison bound, n
+
+255
+00:11:01,910 --> 00:11:02,250
+[AR] log n.
+
+256
+00:11:05,490 --> 00:11:07,950
+[AR] Now, what about array sort?
+
+257
+00:11:08,250 --> 00:11:11,170
+[AR] So suppose I use an unsorted array.
+
+258
+00:11:12,990 --> 00:11:14,310
+[AR] I insert the item.
+
+259
+00:11:14,530 --> 00:11:16,290
+[AR] So if I insert the items, so I'm
+
+260
+00:11:16,290 --> 00:11:17,850
+[AR] doing all the insertions here before all the
+
+261
+00:11:17,850 --> 00:11:18,270
+[AR] deletions.
+
+262
+00:11:18,410 --> 00:11:19,490
+[AR] So what's going to happen is I just
+
+263
+00:11:19,490 --> 00:11:21,490
+[AR] insert the items in the original array order.
+
+264
+00:11:21,650 --> 00:11:22,890
+[AR] In other words, I just take the array.
+
+265
+00:11:23,570 --> 00:11:27,250
+[AR] And then what I do is repeatedly extract
+
+266
+00:11:27,250 --> 00:11:32,970
+[AR] the maximum item by searching for it, moving
+
+267
+00:11:32,970 --> 00:11:34,730
+[AR] it to the end of the array, and
+
+268
+00:11:34,730 --> 00:11:36,010
+[AR] then repeating that process.
+
+269
+00:11:36,110 --> 00:11:36,730
+[AR] That sound familiar?
+
+270
+00:11:38,170 --> 00:11:41,930
+[AR] That's selection sort from lecture three.
+
+271
+00:11:43,850 --> 00:11:47,630
+[AR] So this arrays give us selection sort.
+
+272
+00:11:53,180 --> 00:11:54,620
+[AR] This is a new way to think about
+
+273
+00:11:54,620 --> 00:11:56,280
+[AR] what we were doing way back then.
+
+274
+00:11:56,740 --> 00:12:01,060
+[AR] With a sorted array, what are we doing?
+
+275
+00:12:01,060 --> 00:12:02,700
+[AR] We insert all the items.
+
+276
+00:12:02,940 --> 00:12:04,860
+[AR] That's actually where all the work happens because
+
+277
+00:12:04,860 --> 00:12:06,140
+[AR] we maintain the sorted array.
+
+278
+00:12:06,480 --> 00:12:07,780
+[AR] So we start with an empty array.
+
+279
+00:12:07,880 --> 00:12:08,300
+[AR] It's sorted.
+
+280
+00:12:08,540 --> 00:12:09,320
+[AR] We add an item.
+
+281
+00:12:09,500 --> 00:12:10,140
+[AR] OK, still sorted.
+
+282
+00:12:10,220 --> 00:12:11,040
+[AR] We add a second item.
+
+283
+00:12:11,080 --> 00:12:12,780
+[AR] And we swap if we need to in
+
+284
+00:12:12,780 --> 00:12:13,260
+[AR] order to sort.
+
+285
+00:12:13,420 --> 00:12:15,160
+[AR] In general, when we add an item, we
+
+286
+00:12:15,160 --> 00:12:16,960
+[AR] swap it to the left until it's sorted
+
+287
+00:12:16,960 --> 00:12:17,240
+[AR] again.
+
+288
+00:12:17,440 --> 00:12:19,720
+[AR] That is insertion sort.
+
+289
+00:12:25,760 --> 00:12:26,540
+[AR] Kind of cool.
+
+290
+00:12:26,920 --> 00:12:30,540
+[AR] This is a unifying framework for three sorting
+
+291
+00:12:30,540 --> 00:12:32,080
+[AR] algorithms that we saw before.
+
+292
+00:12:32,240 --> 00:12:34,520
+[AR] We didn't actually talk about AVL sort last
+
+293
+00:12:34,520 --> 00:12:35,540
+[AR] time, but it was in the notes.
+
+294
+00:12:35,960 --> 00:12:38,120
+[AR] And so that is the right part of
+
+295
+00:12:38,120 --> 00:12:38,580
+[AR] this table.
+
+296
+00:12:38,980 --> 00:12:41,600
+[AR] So of course, these array data structures are
+
+297
+00:12:41,600 --> 00:12:42,120
+[AR] not efficient.
+
+298
+00:12:42,400 --> 00:12:44,160
+[AR] They take linear time for some of the
+
+299
+00:12:44,160 --> 00:12:46,040
+[AR] operations, so the sorting algorithms are not efficient.
+
+300
+00:12:46,480 --> 00:12:47,960
+[AR] But they're ones we've seen before, so it's
+
+301
+00:12:47,960 --> 00:12:49,180
+[AR] neat to see how they fit in here.
+
+302
+00:12:50,000 --> 00:12:51,940
+[AR] They had the selection sort and insertion sort
+
+303
+00:12:51,940 --> 00:12:53,660
+[AR] had the advantage that they were in place.
+
+304
+00:12:53,740 --> 00:12:55,680
+[AR] You just needed a constant number of pointers
+
+305
+00:12:55,680 --> 00:12:58,860
+[AR] or indices beyond the array itself.
+
+306
+00:12:59,380 --> 00:13:00,620
+[AR] So they're very space efficient.
+
+307
+00:13:00,980 --> 00:13:02,300
+[AR] So that was a plus for them.
+
+308
+00:13:02,380 --> 00:13:03,980
+[AR] But they take n squared time, so you
+
+309
+00:13:03,980 --> 00:13:04,760
+[AR] should never use them.
+
+310
+00:13:05,320 --> 00:13:07,440
+[AR] Except for n at most 100 or something.
+
+311
+00:13:09,380 --> 00:13:12,040
+[AR] AVL tree sort is great in that it
+
+312
+00:13:12,040 --> 00:13:13,020
+[AR] gets n log n time.
+
+313
+00:13:13,480 --> 00:13:16,020
+[AR] Probably more complicated than merge sort, and you
+
+314
+00:13:16,020 --> 00:13:16,900
+[AR] could stick to merge sort.
+
+315
+00:13:17,360 --> 00:13:19,700
+[AR] But neither merge sort nor set AVL tree
+
+316
+00:13:19,700 --> 00:13:21,440
+[AR] sort are in place.
+
+317
+00:13:22,020 --> 00:13:24,700
+[AR] And so the goal of today is to
+
+318
+00:13:24,700 --> 00:13:26,240
+[AR] get the best of all those worlds in
+
+319
+00:13:26,240 --> 00:13:28,720
+[AR] sorting to get n log n comparisons, which
+
+320
+00:13:28,720 --> 00:13:31,320
+[AR] is optimal in the comparison model, but get
+
+321
+00:13:31,320 --> 00:13:32,440
+[AR] it to be in place.
+
+322
+00:13:32,440 --> 00:13:34,840
+[AR] And that's what we're going to get with
+
+323
+00:13:34,840 --> 00:13:35,620
+[AR] binary heaps.
+
+324
+00:13:38,500 --> 00:13:41,120
+[AR] We're going to design a data structure that
+
+325
+00:13:41,120 --> 00:13:42,780
+[AR] happens to build a little bit faster, as
+
+326
+00:13:42,780 --> 00:13:44,020
+[AR] I mentioned, linear time building.
+
+327
+00:13:45,260 --> 00:13:47,580
+[AR] So it's not representing a sorted order in
+
+328
+00:13:47,580 --> 00:13:48,960
+[AR] the same way that AVL trees are.
+
+329
+00:13:49,640 --> 00:13:51,260
+[AR] But it will be kind of tree based.
+
+330
+00:13:51,340 --> 00:13:52,860
+[AR] It will also be array based.
+
+331
+00:13:53,540 --> 00:13:55,720
+[AR] We're going to get logarithmic time for insert
+
+332
+00:13:55,720 --> 00:13:56,500
+[AR] and delete max.
+
+333
+00:13:56,620 --> 00:13:58,240
+[AR] This happens to be amortized because we use
+
+334
+00:13:58,240 --> 00:13:58,580
+[AR] arrays.
+
+335
+00:13:59,940 --> 00:14:02,060
+[AR] But the key thing is that it's an
+
+336
+00:14:02,060 --> 00:14:03,540
+[AR] in-place data structure.
+
+337
+00:14:03,940 --> 00:14:06,280
+[AR] It only consists of an array of the
+
+338
+00:14:06,280 --> 00:14:06,640
+[AR] items.
+
+339
+00:14:07,900 --> 00:14:09,360
+[AR] And so when we plug it into our
+
+340
+00:14:09,360 --> 00:14:12,760
+[AR] sorting algorithm, priority queue sort, our generic sorting
+
+341
+00:14:12,760 --> 00:14:14,840
+[AR] algorithm, not only do we get n log
+
+342
+00:14:14,840 --> 00:14:16,700
+[AR] n performance, but we also get an in
+
+343
+00:14:16,700 --> 00:14:18,380
+[AR] -place sorting algorithm.
+
+344
+00:14:18,520 --> 00:14:20,540
+[AR] This will be our first and only in
+
+345
+00:14:20,540 --> 00:14:23,020
+[AR] this class, n log n in-place sorting
+
+346
+00:14:23,020 --> 00:14:23,320
+[AR] algorithm.
+
+347
+00:14:24,340 --> 00:14:24,820
+[AR] Cool.
+
+348
+00:14:27,150 --> 00:14:27,950
+[AR] That's the goal.
+
+349
+00:14:27,950 --> 00:14:28,050
+[AR] Cool.
+
+350
+00:14:29,990 --> 00:14:31,150
+[AR] Let's do it.
+
+351
+00:14:31,310 --> 00:14:35,950
+[AR] So what we're going to do, because we're
+
+352
+00:14:35,950 --> 00:14:37,650
+[AR] in place, basically we have to have an
+
+353
+00:14:37,650 --> 00:14:39,550
+[AR] array storing our n items.
+
+354
+00:14:39,710 --> 00:14:41,450
+[AR] That's sort of the definition of in-place,
+
+355
+00:14:41,610 --> 00:14:44,950
+[AR] just using n slots of memory, exactly the
+
+356
+00:14:44,950 --> 00:14:47,130
+[AR] size of the number of items in our
+
+357
+00:14:47,130 --> 00:14:47,450
+[AR] structure.
+
+358
+00:14:47,830 --> 00:14:49,310
+[AR] But we're obviously not going to use a
+
+359
+00:14:49,310 --> 00:14:51,990
+[AR] regular unsorted array or a regular sorted array.
+
+360
+00:14:52,850 --> 00:14:54,490
+[AR] We're going to use array just as sort
+
+361
+00:14:54,490 --> 00:14:57,630
+[AR] of the underlying technology for how things are
+
+362
+00:14:57,630 --> 00:14:57,930
+[AR] stored.
+
+363
+00:14:57,970 --> 00:15:01,070
+[AR] But we'd really like logarithmic performance, which should
+
+364
+00:15:01,070 --> 00:15:02,130
+[AR] make you think tree.
+
+365
+00:15:02,670 --> 00:15:04,250
+[AR] Only way to get a log is with
+
+366
+00:15:04,250 --> 00:15:05,450
+[AR] the binary tree, more or less.
+
+367
+00:15:07,870 --> 00:15:08,950
+[AR] So tree.
+
+368
+00:15:09,530 --> 00:15:13,710
+[AR] Somehow, we want to embed a tree into
+
+369
+00:15:13,710 --> 00:15:14,070
+[AR] an array.
+
+370
+00:15:14,650 --> 00:15:16,110
+[AR] Let me grab an example.
+
+371
+00:15:23,620 --> 00:15:26,300
+[AR] Let me draw a tree.
+
+372
+00:15:44,320 --> 00:15:46,200
+[AR] If I got to choose any old tree
+
+373
+00:15:46,200 --> 00:15:49,320
+[AR] I want, I would choose a tree that's
+
+374
+00:15:49,320 --> 00:15:51,120
+[AR] basically perfectly balanced.
+
+375
+00:15:51,340 --> 00:15:55,300
+[AR] Perfectly balanced would be like this, where what's
+
+376
+00:15:55,300 --> 00:15:55,800
+[AR] the property?
+
+377
+00:15:56,060 --> 00:15:59,040
+[AR] That I have all of these levels, all
+
+378
+00:15:59,040 --> 00:16:01,360
+[AR] of these depths are completely filled with nodes.
+
+379
+00:16:01,600 --> 00:16:03,060
+[AR] This is depth 0.
+
+380
+00:16:05,420 --> 00:16:07,300
+[AR] Remember, this is depth 1.
+
+381
+00:16:07,660 --> 00:16:08,780
+[AR] This is depth 2.
+
+382
+00:16:09,260 --> 00:16:10,580
+[AR] This is depth 3.
+
+383
+00:16:11,220 --> 00:16:14,080
+[AR] So what I'd really like is to have
+
+384
+00:16:14,080 --> 00:16:19,440
+[AR] 2 to the i nodes at depth i.
+
+385
+00:16:20,520 --> 00:16:23,820
+[AR] That would be a perfect binary tree.
+
+386
+00:16:24,960 --> 00:16:27,040
+[AR] But that only works when n is 1
+
+387
+00:16:27,040 --> 00:16:27,960
+[AR] less than a power of 2.
+
+388
+00:16:28,640 --> 00:16:31,140
+[AR] I can't always achieve that for any n.
+
+389
+00:16:31,660 --> 00:16:33,180
+[AR] And so the next best thing I could
+
+390
+00:16:33,180 --> 00:16:36,120
+[AR] hope for is 2 to the i nodes
+
+391
+00:16:36,120 --> 00:16:38,300
+[AR] at depth i until the very last i,
+
+392
+00:16:38,400 --> 00:16:39,320
+[AR] the largest depth.
+
+393
+00:16:39,980 --> 00:16:42,860
+[AR] And in that level, I'm still going to
+
+394
+00:16:42,860 --> 00:16:43,560
+[AR] restrict things.
+
+395
+00:16:43,660 --> 00:16:45,320
+[AR] I'm going to force all of the nodes
+
+396
+00:16:45,320 --> 00:16:46,900
+[AR] to be as far left as possible.
+
+397
+00:16:48,600 --> 00:16:53,720
+[AR] So I want to say, except at max
+
+398
+00:16:53,720 --> 00:17:03,720
+[AR] depth, where nodes are, I'll
+
+399
+00:17:03,720 --> 00:17:04,740
+[AR] call them, left justified.
+
+400
+00:17:06,020 --> 00:17:13,220
+[AR] And these two properties together is what I
+
+401
+00:17:13,220 --> 00:17:15,119
+[AR] call a complete binary tree.
+
+402
+00:17:27,430 --> 00:17:28,770
+[AR] Why is this interesting?
+
+403
+00:17:29,370 --> 00:17:32,310
+[AR] Because I claim I can represent a tree
+
+404
+00:17:32,310 --> 00:17:33,990
+[AR] like this as an array.
+
+405
+00:17:35,090 --> 00:17:38,710
+[AR] I've narrowed things down enough that I can
+
+406
+00:17:38,710 --> 00:17:39,910
+[AR] draw an array down here.
+
+407
+00:17:40,950 --> 00:17:42,750
+[AR] And what I'm going to do is write
+
+408
+00:17:42,750 --> 00:17:44,430
+[AR] these nodes in depth order.
+
+409
+00:17:45,150 --> 00:17:47,050
+[AR] So I'll write a first, because that's depth
+
+410
+00:17:47,050 --> 00:17:47,370
+[AR] 0.
+
+411
+00:17:47,670 --> 00:17:49,650
+[AR] Then bc, that's depth 1.
+
+412
+00:17:50,770 --> 00:17:53,030
+[AR] Then, well, they're alphabetical.
+
+413
+00:17:53,110 --> 00:17:54,090
+[AR] I made it that way.
+
+414
+00:17:56,070 --> 00:17:57,810
+[AR] defg is depth 2.
+
+415
+00:17:58,450 --> 00:18:00,650
+[AR] And then hij is depth 3.
+
+416
+00:18:02,930 --> 00:18:05,590
+[AR] This is very different from traversal order of
+
+417
+00:18:05,590 --> 00:18:05,870
+[AR] a tree.
+
+418
+00:18:06,270 --> 00:18:08,150
+[AR] Traversal order would have been h, d, i,
+
+419
+00:18:08,170 --> 00:18:10,510
+[AR] b, j, e, a, f, c, g.
+
+420
+00:18:11,290 --> 00:18:13,550
+[AR] OK, but this is what we might call
+
+421
+00:18:13,550 --> 00:18:14,150
+[AR] depth order.
+
+422
+00:18:15,090 --> 00:18:16,730
+[AR] Do the lowest depth nodes first.
+
+423
+00:18:17,610 --> 00:18:20,030
+[AR] Very different way to lay things out or
+
+424
+00:18:20,030 --> 00:18:22,250
+[AR] to linearize our data.
+
+425
+00:18:24,090 --> 00:18:26,510
+[AR] And this is what a heap is going
+
+426
+00:18:26,510 --> 00:18:27,030
+[AR] to look like.
+
+427
+00:18:27,250 --> 00:18:33,210
+[AR] So the cool thing is, between complete binary
+
+428
+00:18:33,210 --> 00:18:36,190
+[AR] trees and arrays is a bijection.
+
+429
+00:18:36,350 --> 00:18:39,030
+[AR] For every array, there's a unique complete binary
+
+430
+00:18:39,030 --> 00:18:39,410
+[AR] tree.
+
+431
+00:18:39,410 --> 00:18:41,590
+[AR] And for every complete binary tree, there's a
+
+432
+00:18:41,590 --> 00:18:42,150
+[AR] unique array.
+
+433
+00:18:43,270 --> 00:18:43,630
+[AR] Why?
+
+434
+00:18:43,890 --> 00:18:48,230
+[AR] Because the complete constraint forces everything, forces my
+
+435
+00:18:48,230 --> 00:18:48,470
+[AR] hand.
+
+436
+00:18:48,590 --> 00:18:50,230
+[AR] There's only, if I give you a number
+
+437
+00:18:50,230 --> 00:18:52,890
+[AR] n, there is one tree shape of size
+
+438
+00:18:52,890 --> 00:18:53,190
+[AR] n.
+
+439
+00:18:53,590 --> 00:18:56,610
+[AR] You just fill in the nodes, top down,
+
+440
+00:18:56,690 --> 00:18:57,750
+[AR] until you get to the last level.
+
+441
+00:18:57,830 --> 00:18:58,770
+[AR] And then you have to fill them in
+
+442
+00:18:58,770 --> 00:19:01,170
+[AR] left to right, what you might call reading
+
+443
+00:19:01,170 --> 00:19:03,410
+[AR] order for writing down nodes.
+
+444
+00:19:03,630 --> 00:19:06,330
+[AR] And the array is telling you which keys
+
+445
+00:19:06,330 --> 00:19:06,770
+[AR] go where.
+
+446
+00:19:07,030 --> 00:19:08,490
+[AR] This is the first node you write down
+
+447
+00:19:08,490 --> 00:19:08,910
+[AR] at the root.
+
+448
+00:19:08,910 --> 00:19:10,670
+[AR] This is the next node you write down
+
+449
+00:19:10,670 --> 00:19:12,230
+[AR] at the left child of the root, and
+
+450
+00:19:12,230 --> 00:19:12,650
+[AR] so on.
+
+451
+00:19:13,490 --> 00:19:16,090
+[AR] So here we have a binary tree represented
+
+452
+00:19:16,090 --> 00:19:18,630
+[AR] as an array, or an array representing a
+
+453
+00:19:18,630 --> 00:19:19,150
+[AR] binary tree.
+
+454
+00:19:19,510 --> 00:19:22,430
+[AR] The very specific binary tree, it has a
+
+455
+00:19:22,430 --> 00:19:25,410
+[AR] clear advantage, which is it is guaranteed balanced.
+
+456
+00:19:25,550 --> 00:19:28,510
+[AR] No rotation is necessary in heaps, because complete
+
+457
+00:19:28,510 --> 00:19:29,730
+[AR] binary trees are always balanced.
+
+458
+00:19:29,830 --> 00:19:31,370
+[AR] In fact, they have the best height they
+
+459
+00:19:31,370 --> 00:19:35,310
+[AR] possibly could, which is ceiling of log n.
+
+460
+00:19:39,530 --> 00:19:41,310
+[AR] Balanced, remember, just meant you were big O
+
+461
+00:19:41,310 --> 00:19:41,830
+[AR] of log n.
+
+462
+00:19:42,130 --> 00:19:44,270
+[AR] This is 1 times log n.
+
+463
+00:19:44,330 --> 00:19:46,830
+[AR] So it's the best level of balance you
+
+464
+00:19:46,830 --> 00:19:47,330
+[AR] could hope for.
+
+465
+00:19:47,750 --> 00:19:51,390
+[AR] So somehow, I claim, we can maintain a
+
+466
+00:19:51,390 --> 00:19:54,130
+[AR] complete binary tree for solving priority queues.
+
+467
+00:19:54,190 --> 00:19:55,570
+[AR] This would not be possible if you were
+
+468
+00:19:55,570 --> 00:19:57,050
+[AR] trying to solve the whole set interface.
+
+469
+00:19:57,610 --> 00:19:58,870
+[AR] And that's kind of the cool thing about
+
+470
+00:19:58,870 --> 00:20:01,130
+[AR] heaps, is that by just focusing on the
+
+471
+00:20:01,130 --> 00:20:04,550
+[AR] subset of the set interface, we can do
+
+472
+00:20:04,550 --> 00:20:04,910
+[AR] more.
+
+473
+00:20:04,910 --> 00:20:06,970
+[AR] We can maintain this very strong property.
+
+474
+00:20:07,730 --> 00:20:09,270
+[AR] And because we have this very strong property,
+
+475
+00:20:09,370 --> 00:20:10,750
+[AR] we don't even need to store this tree.
+
+476
+00:20:10,890 --> 00:20:12,130
+[AR] We're not going to store left and right
+
+477
+00:20:12,130 --> 00:20:13,930
+[AR] pointers and parent pointers.
+
+478
+00:20:14,150 --> 00:20:15,430
+[AR] We're just going to store the array.
+
+479
+00:20:16,330 --> 00:20:19,090
+[AR] This is what we call an implicit data
+
+480
+00:20:19,090 --> 00:20:28,860
+[AR] structure, which
+
+481
+00:20:28,860 --> 00:20:37,840
+[AR] basically means no pointers, just an array of
+
+482
+00:20:37,840 --> 00:20:38,620
+[AR] the n items.
+
+483
+00:20:43,830 --> 00:20:45,330
+[AR] How are we going to get away without
+
+484
+00:20:45,330 --> 00:20:46,010
+[AR] storing pointers?
+
+485
+00:20:46,590 --> 00:20:48,350
+[AR] I'd still like to treat it like a
+
+486
+00:20:48,350 --> 00:20:48,590
+[AR] tree.
+
+487
+00:20:48,730 --> 00:20:51,150
+[AR] I'd still like to know the left child
+
+488
+00:20:51,150 --> 00:20:52,870
+[AR] of B is D and the right child
+
+489
+00:20:52,870 --> 00:20:53,750
+[AR] of B is E.
+
+490
+00:20:54,050 --> 00:20:55,350
+[AR] We'll see why in a moment.
+
+491
+00:20:56,310 --> 00:21:01,010
+[AR] Well, we can do this with index arithmetic.
+
+492
+00:21:03,410 --> 00:21:06,110
+[AR] So maybe I should add some labels before
+
+493
+00:21:06,110 --> 00:21:06,550
+[AR] I get there.
+
+494
+00:21:10,980 --> 00:21:13,560
+[AR] So this array naturally has indices.
+
+495
+00:21:14,020 --> 00:21:15,160
+[AR] This is index 0.
+
+496
+00:21:16,240 --> 00:21:18,900
+[AR] This is index 1, index 2, index 3,
+
+497
+00:21:19,320 --> 00:21:22,680
+[AR] index 4, index 5, index 6, 7, 8,
+
+498
+00:21:23,040 --> 00:21:26,340
+[AR] 9, because there are 10 items, 0 through
+
+499
+00:21:26,340 --> 00:21:26,640
+[AR] 9.
+
+500
+00:21:27,580 --> 00:21:29,360
+[AR] And I can apply those labels up here,
+
+501
+00:21:29,420 --> 00:21:29,540
+[AR] too.
+
+502
+00:21:29,620 --> 00:21:30,540
+[AR] These are the same nodes.
+
+503
+00:21:30,620 --> 00:21:32,440
+[AR] So 0, 1, 2.
+
+504
+00:21:32,520 --> 00:21:34,140
+[AR] This is just depth order.
+
+505
+00:21:36,620 --> 00:21:38,260
+[AR] But once I have this labeling, it's going
+
+506
+00:21:38,260 --> 00:21:39,440
+[AR] to be a lot easier to figure things
+
+507
+00:21:39,440 --> 00:21:39,660
+[AR] out.
+
+508
+00:21:39,920 --> 00:21:41,160
+[AR] So if I wanted to know the left
+
+509
+00:21:41,160 --> 00:21:43,800
+[AR] child of B is D, somehow, given the
+
+510
+00:21:43,800 --> 00:21:46,180
+[AR] number 1, I want to compute the number
+
+511
+00:21:46,180 --> 00:21:46,520
+[AR] 3.
+
+512
+00:21:46,520 --> 00:21:52,600
+[AR] 3, add 2, multiply by 3.
+
+513
+00:21:52,720 --> 00:21:54,280
+[AR] There are all sorts of operations that take
+
+514
+00:21:54,280 --> 00:21:55,420
+[AR] 1 and turn it into 3.
+
+515
+00:21:55,660 --> 00:21:57,240
+[AR] But there's only one that's going to work
+
+516
+00:21:57,240 --> 00:21:58,000
+[AR] in all cases.
+
+517
+00:21:58,560 --> 00:22:00,440
+[AR] And the intuition here is, well, I have
+
+518
+00:22:00,440 --> 00:22:02,040
+[AR] 2 to the i nodes at level i.
+
+519
+00:22:02,480 --> 00:22:03,740
+[AR] If I want to go to the child
+
+520
+00:22:03,740 --> 00:22:05,720
+[AR] level, there's 2 to the i plus 1
+
+521
+00:22:05,720 --> 00:22:07,760
+[AR] nodes down there, exactly double.
+
+522
+00:22:08,260 --> 00:22:09,920
+[AR] Except the very last one, but that won't
+
+523
+00:22:09,920 --> 00:22:10,860
+[AR] really matter.
+
+524
+00:22:10,960 --> 00:22:12,220
+[AR] If there is a left child, it will
+
+525
+00:22:12,220 --> 00:22:12,860
+[AR] behave the same.
+
+526
+00:22:13,360 --> 00:22:15,000
+[AR] And so intuitively, I have this space of
+
+527
+00:22:15,000 --> 00:22:15,700
+[AR] size 2 to the i.
+
+528
+00:22:15,700 --> 00:22:17,140
+[AR] I have to expand it to a space
+
+529
+00:22:17,140 --> 00:22:18,840
+[AR] of size 2 to the i plus 1.
+
+530
+00:22:19,260 --> 00:22:20,980
+[AR] So I should multiply by 2.
+
+531
+00:22:22,240 --> 00:22:23,520
+[AR] And that's almost right.
+
+532
+00:22:23,780 --> 00:22:25,880
+[AR] But then there's some constants.
+
+533
+00:22:26,860 --> 00:22:28,880
+[AR] So I'd like to say 2 times i.
+
+534
+00:22:29,360 --> 00:22:31,500
+[AR] But if we look at the examples here,
+
+535
+00:22:31,900 --> 00:22:34,620
+[AR] 1 times 2 is 2, which is 1
+
+536
+00:22:34,620 --> 00:22:35,200
+[AR] less than 3.
+
+537
+00:22:35,980 --> 00:22:37,780
+[AR] 2 times 2 is 4, which is 1
+
+538
+00:22:37,780 --> 00:22:38,300
+[AR] less than 5.
+
+539
+00:22:38,360 --> 00:22:39,640
+[AR] Hey, we almost got it right.
+
+540
+00:22:39,680 --> 00:22:40,480
+[AR] It's just off by 1.
+
+541
+00:22:44,440 --> 00:22:47,120
+[AR] 1 is index errors are the most common
+
+542
+00:22:47,120 --> 00:22:48,220
+[AR] things in computer science.
+
+543
+00:22:50,560 --> 00:22:51,740
+[AR] What about the right child?
+
+544
+00:22:54,070 --> 00:22:55,510
+[AR] If the left child is a 2i plus
+
+545
+00:22:55,510 --> 00:22:56,490
+[AR] 1, where's the right child?
+
+546
+00:22:59,540 --> 00:23:00,380
+[AR] I hear lots of mumbles.
+
+547
+00:23:00,480 --> 00:23:01,280
+[AR] 2i plus 2.
+
+548
+00:23:03,120 --> 00:23:03,800
+[AR] One more.
+
+549
+00:23:03,940 --> 00:23:05,540
+[AR] Because we're writing things left to right in
+
+550
+00:23:05,540 --> 00:23:08,300
+[AR] depth order, the right child is the right
+
+551
+00:23:08,300 --> 00:23:09,620
+[AR] sibling of the left child.
+
+552
+00:23:09,640 --> 00:23:10,980
+[AR] So it's just one larger.
+
+553
+00:23:11,780 --> 00:23:15,420
+[AR] Given those rules, we can also compute parent.
+
+554
+00:23:15,780 --> 00:23:18,380
+[AR] It's just whatever is the inverse of both
+
+555
+00:23:18,380 --> 00:23:22,960
+[AR] of these functions, which I want to divide
+
+556
+00:23:22,960 --> 00:23:24,380
+[AR] by 2 at some point.
+
+557
+00:23:24,960 --> 00:23:26,840
+[AR] But I want to get back to i
+
+558
+00:23:26,840 --> 00:23:28,720
+[AR] given 2i plus 1 or given 2i plus
+
+559
+00:23:28,720 --> 00:23:28,980
+[AR] 2.
+
+560
+00:23:29,460 --> 00:23:34,680
+[AR] And so if I subtract 1 from i,
+
+561
+00:23:35,840 --> 00:23:37,560
+[AR] then I either get 2i or 2i plus
+
+562
+00:23:37,560 --> 00:23:37,820
+[AR] 1.
+
+563
+00:23:38,060 --> 00:23:40,000
+[AR] And then if I take an integer division
+
+564
+00:23:40,000 --> 00:23:43,260
+[AR] by 2, I get i, the original i.
+
+565
+00:23:43,640 --> 00:23:45,780
+[AR] Sorry, maybe I'll call this j to be
+
+566
+00:23:45,780 --> 00:23:46,080
+[AR] clearer.
+
+567
+00:23:46,700 --> 00:23:48,820
+[AR] So j is the left or right child.
+
+568
+00:23:49,380 --> 00:23:51,520
+[AR] Then I can reconstruct i, which was the
+
+569
+00:23:51,520 --> 00:23:51,760
+[AR] parent.
+
+570
+00:23:53,020 --> 00:23:56,000
+[AR] So this is a constant number arithmetic operation.
+
+571
+00:23:56,160 --> 00:23:58,160
+[AR] So I don't have to store left and
+
+572
+00:23:58,160 --> 00:23:58,540
+[AR] right pointers.
+
+573
+00:23:58,620 --> 00:24:00,100
+[AR] I can just compute them whenever I need
+
+574
+00:24:00,100 --> 00:24:00,300
+[AR] them.
+
+575
+00:24:00,420 --> 00:24:03,300
+[AR] Whenever I'm at some node like E, and
+
+576
+00:24:03,300 --> 00:24:04,660
+[AR] I want to know what's its left child,
+
+577
+00:24:05,500 --> 00:24:08,800
+[AR] sorry, given the node index 4, which happens
+
+578
+00:24:08,800 --> 00:24:11,560
+[AR] to contain the item E, and I want
+
+579
+00:24:11,560 --> 00:24:12,760
+[AR] to know what's its left child, I just
+
+580
+00:24:12,760 --> 00:24:13,780
+[AR] multiply by 2 and add 1.
+
+581
+00:24:13,840 --> 00:24:14,360
+[AR] I get 9.
+
+582
+00:24:14,880 --> 00:24:16,600
+[AR] Then I can index into this array at
+
+583
+00:24:16,600 --> 00:24:18,640
+[AR] position 9, because this is just in my
+
+584
+00:24:18,640 --> 00:24:18,920
+[AR] head.
+
+585
+00:24:19,000 --> 00:24:21,920
+[AR] Remember, we're just thinking that there's a tree
+
+586
+00:24:21,920 --> 00:24:22,220
+[AR] here.
+
+587
+00:24:22,520 --> 00:24:24,800
+[AR] But in reality, on the computer, there's just
+
+588
+00:24:24,800 --> 00:24:25,220
+[AR] the array.
+
+589
+00:24:26,160 --> 00:24:27,780
+[AR] So if we want to go from E
+
+590
+00:24:27,780 --> 00:24:29,820
+[AR] to j, we can, from 4 to 9.
+
+591
+00:24:30,400 --> 00:24:32,040
+[AR] If we try to go to the right
+
+592
+00:24:32,040 --> 00:24:34,540
+[AR] child, we multiply by 2, 8, add 2,
+
+593
+00:24:34,740 --> 00:24:35,060
+[AR] 10.
+
+594
+00:24:35,380 --> 00:24:36,920
+[AR] And we see, oh, 10 is beyond the
+
+595
+00:24:36,920 --> 00:24:37,520
+[AR] end of the array.
+
+596
+00:24:37,800 --> 00:24:39,080
+[AR] But our array stores its size.
+
+597
+00:24:39,140 --> 00:24:40,720
+[AR] So we realize, oh, E does not have
+
+598
+00:24:40,720 --> 00:24:41,260
+[AR] a right child.
+
+599
+00:24:41,900 --> 00:24:43,600
+[AR] This is something you can only do in
+
+600
+00:24:43,600 --> 00:24:44,540
+[AR] a complete binary tree.
+
+601
+00:24:45,000 --> 00:24:46,660
+[AR] In a general binary tree, you don't have
+
+602
+00:24:46,660 --> 00:24:47,400
+[AR] these nice properties.
+
+603
+00:24:49,660 --> 00:24:50,100
+[AR] Cool.
+
+604
+00:24:51,200 --> 00:24:53,860
+[AR] So this is basically a heap.
+
+605
+00:24:53,920 --> 00:24:55,860
+[AR] I just need to add one more property,
+
+606
+00:24:58,350 --> 00:24:59,930
+[AR] naturally, called the heap property.
+
+607
+00:25:06,200 --> 00:25:09,300
+[AR] So there are multiple types of heaps.
+
+608
+00:25:09,520 --> 00:25:11,120
+[AR] This type of heap is called a binary
+
+609
+00:25:11,120 --> 00:25:11,420
+[AR] heap.
+
+610
+00:25:11,840 --> 00:25:13,760
+[AR] We will talk about others in future lectures.
+
+611
+00:25:14,580 --> 00:25:15,760
+[AR] I'm going to call it Q.
+
+612
+00:25:18,080 --> 00:25:27,900
+[AR] Maybe I should write the explicit
+
+613
+00:25:27,900 --> 00:25:28,300
+[AR] thing.
+
+614
+00:25:28,580 --> 00:25:33,260
+[AR] This is an array representing a complete binary
+
+615
+00:25:33,260 --> 00:25:48,660
+[AR] tree called the
+
+616
+00:25:48,660 --> 00:25:49,160
+[AR] array Q.
+
+617
+00:25:49,540 --> 00:25:57,680
+[AR] And we want every node to satisfy
+
+618
+00:25:57,680 --> 00:26:16,970
+[AR] the so-called max heap property, which
+
+619
+00:26:16,970 --> 00:26:20,870
+[AR] says Q of i is greater than or
+
+620
+00:26:20,870 --> 00:26:25,490
+[AR] equal to Q of j for both children
+
+621
+00:26:25,490 --> 00:26:29,830
+[AR] left of i and right of i.
+
+622
+00:26:38,040 --> 00:26:43,180
+[AR] So we have a node, i, and has
+
+623
+00:26:43,180 --> 00:26:46,440
+[AR] two children, 2i plus 1 and 2i plus
+
+624
+00:26:46,440 --> 00:26:46,720
+[AR] 2.
+
+625
+00:26:47,940 --> 00:26:50,200
+[AR] These are our two values of j.
+
+626
+00:26:53,080 --> 00:26:55,920
+[AR] What we want is a greater than or
+
+627
+00:26:55,920 --> 00:26:58,740
+[AR] equal to relation here and here.
+
+628
+00:26:59,900 --> 00:27:01,520
+[AR] So this node should be bigger than both
+
+629
+00:27:01,520 --> 00:27:02,300
+[AR] this one and this one.
+
+630
+00:27:02,500 --> 00:27:03,520
+[AR] Which of these is larger?
+
+631
+00:27:03,780 --> 00:27:04,440
+[AR] We don't know.
+
+632
+00:27:04,540 --> 00:27:05,340
+[AR] And we don't care.
+
+633
+00:27:06,120 --> 00:27:08,740
+[AR] Very different from binary search trees or set
+
+634
+00:27:08,740 --> 00:27:11,300
+[AR] binary trees, where we said these guys were
+
+635
+00:27:11,300 --> 00:27:12,680
+[AR] less than or equal to this one.
+
+636
+00:27:12,940 --> 00:27:14,080
+[AR] This one was less than or equal to
+
+637
+00:27:14,080 --> 00:27:15,220
+[AR] all the nodes in the subtree.
+
+638
+00:27:15,220 --> 00:27:17,300
+[AR] Here, we're just locally saying this node is
+
+639
+00:27:17,300 --> 00:27:19,160
+[AR] greater than or equal to this node and
+
+640
+00:27:19,160 --> 00:27:19,640
+[AR] this node.
+
+641
+00:27:20,060 --> 00:27:21,700
+[AR] So the biggest is at the top.
+
+642
+00:27:25,880 --> 00:27:30,980
+[AR] So one nice lemma about these heaps, this
+
+643
+00:27:30,980 --> 00:27:31,600
+[AR] is weird.
+
+644
+00:27:33,660 --> 00:27:35,240
+[AR] Let me give you some more intuition.
+
+645
+00:27:36,460 --> 00:27:38,260
+[AR] If you are a binary heap, if you
+
+646
+00:27:38,260 --> 00:27:40,960
+[AR] satisfy this max heap property everywhere, then, in
+
+647
+00:27:40,960 --> 00:27:44,960
+[AR] fact, you learn that every node i is
+
+648
+00:27:44,960 --> 00:27:47,620
+[AR] greater than or equal to all nodes in
+
+649
+00:27:47,620 --> 00:27:48,120
+[AR] its subtree.
+
+650
+00:27:48,260 --> 00:27:55,140
+[AR] These are what we call descendants and subtree
+
+651
+00:27:55,140 --> 00:27:55,700
+[AR] of i.
+
+652
+00:28:00,100 --> 00:28:03,040
+[AR] Let me look at this example.
+
+653
+00:28:03,300 --> 00:28:05,000
+[AR] So I haven't written any numbers here, but
+
+654
+00:28:05,000 --> 00:28:05,760
+[AR] you can imagine.
+
+655
+00:28:06,400 --> 00:28:09,040
+[AR] So a here is greater than or equal
+
+656
+00:28:09,040 --> 00:28:10,100
+[AR] to both b and c.
+
+657
+00:28:10,760 --> 00:28:12,000
+[AR] And b is greater than or equal to
+
+658
+00:28:12,000 --> 00:28:12,580
+[AR] d and e.
+
+659
+00:28:12,580 --> 00:28:14,020
+[AR] And c is greater than or equal to
+
+660
+00:28:14,020 --> 00:28:14,580
+[AR] f and g.
+
+661
+00:28:15,000 --> 00:28:15,820
+[AR] And d is greater than or equal to
+
+662
+00:28:15,820 --> 00:28:16,300
+[AR] h and i.
+
+663
+00:28:16,340 --> 00:28:17,240
+[AR] And e is greater than or equal to
+
+664
+00:28:17,240 --> 00:28:17,440
+[AR] j.
+
+665
+00:28:17,600 --> 00:28:20,200
+[AR] That would make this structure a heap, not
+
+666
+00:28:20,200 --> 00:28:21,320
+[AR] just a complete binary tree.
+
+667
+00:28:23,400 --> 00:28:24,520
+[AR] So what does that imply?
+
+668
+00:28:24,640 --> 00:28:26,580
+[AR] It implies that a must be the maximum.
+
+669
+00:28:27,200 --> 00:28:28,600
+[AR] So you look at any node here, like
+
+670
+00:28:28,600 --> 00:28:30,860
+[AR] j, a is greater than or equal to
+
+671
+00:28:30,860 --> 00:28:32,140
+[AR] b, is greater than or equal to e,
+
+672
+00:28:32,200 --> 00:28:33,220
+[AR] is greater than or equal to j.
+
+673
+00:28:34,300 --> 00:28:36,160
+[AR] And in general, what we're saying is that
+
+674
+00:28:36,160 --> 00:28:37,800
+[AR] a is greater than or equal to all
+
+675
+00:28:37,800 --> 00:28:38,440
+[AR] nodes in the tree.
+
+676
+00:28:38,780 --> 00:28:39,940
+[AR] b is greater than or equal to all
+
+677
+00:28:39,940 --> 00:28:41,700
+[AR] nodes in its subtree, down here.
+
+678
+00:28:42,380 --> 00:28:43,400
+[AR] c is greater than or equal to all
+
+679
+00:28:43,400 --> 00:28:44,200
+[AR] nodes in its subtree.
+
+680
+00:28:44,540 --> 00:28:46,100
+[AR] That's what this lemma is saying.
+
+681
+00:28:46,940 --> 00:28:49,360
+[AR] You can prove this lemma by induction.
+
+682
+00:28:50,680 --> 00:28:52,640
+[AR] But it's really simple.
+
+683
+00:28:54,980 --> 00:28:56,740
+[AR] If you have two nodes, i and j,
+
+684
+00:28:56,840 --> 00:28:58,940
+[AR] and j is somewhere in the subtree, that
+
+685
+00:28:58,940 --> 00:29:03,100
+[AR] means there's some downward path from i to
+
+686
+00:29:03,100 --> 00:29:03,400
+[AR] j.
+
+687
+00:29:03,740 --> 00:29:05,620
+[AR] And you know that for every edge we
+
+688
+00:29:05,620 --> 00:29:08,200
+[AR] traverse on a downward path, our key is
+
+689
+00:29:08,200 --> 00:29:10,200
+[AR] going down non-strictly.
+
+690
+00:29:10,700 --> 00:29:12,160
+[AR] Every child is less than or equal to
+
+691
+00:29:12,160 --> 00:29:12,620
+[AR] its parent.
+
+692
+00:29:13,080 --> 00:29:14,060
+[AR] i is greater than or equal to this,
+
+693
+00:29:14,100 --> 00:29:15,040
+[AR] is greater than or equal to this, is
+
+694
+00:29:15,040 --> 00:29:15,840
+[AR] greater than or equal to this, is greater
+
+695
+00:29:15,840 --> 00:29:16,440
+[AR] than or equal to j.
+
+696
+00:29:17,760 --> 00:29:21,120
+[AR] So by transitivity of less than or equal
+
+697
+00:29:21,120 --> 00:29:23,060
+[AR] to, you know that i is, in fact,
+
+698
+00:29:23,120 --> 00:29:24,200
+[AR] greater than or equal to j.
+
+699
+00:29:24,740 --> 00:29:26,880
+[AR] Or sorry, the key in i is greater
+
+700
+00:29:26,880 --> 00:29:28,300
+[AR] than or equal to the key in j.
+
+701
+00:29:28,820 --> 00:29:30,700
+[AR] This is what we're calling i, the index.
+
+702
+00:29:30,840 --> 00:29:32,800
+[AR] This is what we would call q of
+
+703
+00:29:32,800 --> 00:29:33,120
+[AR] i.
+
+704
+00:29:34,120 --> 00:29:36,920
+[AR] This is index j, q of j.
+
+705
+00:29:39,420 --> 00:29:39,900
+[AR] OK.
+
+706
+00:29:39,980 --> 00:29:44,780
+[AR] Very different way to organize keys in a
+
+707
+00:29:44,780 --> 00:29:44,980
+[AR] tree.
+
+708
+00:29:46,420 --> 00:29:49,320
+[AR] But as you might imagine, this is going
+
+709
+00:29:49,320 --> 00:29:51,080
+[AR] to be good for priority queues, because priority
+
+710
+00:29:51,080 --> 00:29:53,460
+[AR] queues just need to find the maximum element.
+
+711
+00:29:54,520 --> 00:29:55,580
+[AR] Then they need to delete it.
+
+712
+00:29:55,620 --> 00:29:57,260
+[AR] That's going to be harder, because deleting the
+
+713
+00:29:57,260 --> 00:29:58,980
+[AR] root is like, that's the hardest node.
+
