@@ -1,0 +1,2852 @@
+1
+00:00:04,660 --> 00:00:16,1300
+(Transcribed by TurboScribe.ai. Go Unlimited to remove this message.) All right, welcome back to 006 Data Structures
+
+2
+00:00:16,1302 --> 00:00:19,1708
+اليوم سنتناول نوعًا مختلفًا
+
+3
+00:00:19,1710 --> 00:00:22,420
+من بنية بيانات تشبه الشجرة وتسمى "هيب"
+
+4
+00:00:22,422 --> 00:00:23,422
+الهيب الثنائي
+
+5
+00:00:23,424 --> 00:00:25,730
+سيمكننا هذا من حل مشكلات الفرز
+
+6
+00:00:25,732 --> 00:00:26,732
+بطريقة جديدة
+
+7
+00:00:26,734 --> 00:00:31,018
+دعوني أذكّركم أولًا بجزء معين
+
+8
+00:00:31,020 --> 00:00:32,292
+المشكلة التي سنحلها اليوم
+
+9
+00:00:32,294 --> 00:00:33,672
+تُسمى "طابور الأولويات"
+
+10
+00:00:33,714 --> 00:00:34,1486
+هذه هي الواجهة
+
+11
+00:00:34,1488 --> 00:00:37,312
+We'll see several data structures, but one main
+
+12
+00:00:37,314 --> 00:00:38,314
+data structure for today
+
+13
+00:00:38,1678 --> 00:00:44,1482
+And this is a subset of the set
+
+14
+00:00:44,1484 --> 00:00:45,1484
+interface
+
+15
+00:00:46,1842 --> 00:00:49,1878
+And subsets are interesting because potentially we can
+
+16
+00:00:49,1880 --> 00:00:52,790
+solve them better, faster, simpler, something
+
+17
+00:00:53,216 --> 00:00:58,1584
+And so you'll recognize, you should recognize all
+
+18
+00:00:58,1586 --> 00:01:01,1018
+of these operations, except we didn't normally highlight
+
+19
+00:01:01,1020 --> 00:01:02,1122
+the max operation
+
+20
+00:01:02,1124 --> 00:01:05,240
+So here we're interested in storing a bunch
+
+21
+00:01:05,242 --> 00:01:06,242
+of items
+
+22
+00:01:06,244 --> 00:01:09,1142
+They have keys, which we think of as
+
+23
+00:01:09,1144 --> 00:01:10,1144
+priorities
+
+24
+00:01:10,1146 --> 00:01:12,528
+And we want to be able to identify
+
+25
+00:01:12,530 --> 00:01:16,1556
+the maximum priority item in our set and
+
+26
+00:01:16,1558 --> 00:01:17,1558
+remove it
+
+27
+00:01:17,1560 --> 00:01:19,696
+And so there's lots of motivations for this
+
+28
+00:01:19,698 --> 00:01:21,244
+Maybe you have a router, packets going into
+
+29
+00:01:21,246 --> 00:01:23,170
+the router, they have different priorities assigned to
+
+30
+00:01:23,172 --> 00:01:24,830
+them, you want to route the highest priority
+
+31
+00:01:24,832 --> 00:01:25,832
+first
+
+32
+00:01:25,834 --> 00:01:28,1206
+Or you have processes on your computer trying
+
+33
+00:01:28,1208 --> 00:01:33,078
+to run on your single-threaded, single core,
+
+34
+00:01:33,080 --> 00:01:34,092
+and you've got to choose which one to
+
+35
+00:01:34,094 --> 00:01:36,1444
+run next, and you usually run higher priority
+
+36
+00:01:36,1446 --> 00:01:37,1446
+processes first
+
+37
+00:01:37,1448 --> 00:01:42,1500
+Or you're trying to simulate a system where
+
+38
+00:01:42,1502 --> 00:01:44,820
+events happen at different times, and you want
+
+39
+00:01:44,822 --> 00:01:47,640
+to process the next event ordered by time
+
+40
+00:01:47,642 --> 00:01:49,1692
+All of these are examples of the priority
+
+41
+00:01:49,1694 --> 00:01:50,1694
+queue interface
+
+42
+00:01:50,1696 --> 00:01:52,1726
+We'll even see applications within this class when
+
+43
+00:01:52,1728 --> 00:01:53,1728
+we get to graph algorithms
+
+44
+00:01:53,1730 --> 00:01:56,726
+But the main two things we want to
+
+45
+00:01:56,728 --> 00:01:57,1822
+be able to support are inserting an item,
+
+46
+00:01:57,1824 --> 00:02:00,1542
+which includes a key, and deleting the maximum
+
+47
+00:02:00,1544 --> 00:02:02,1320
+item, and also returning it at the same
+
+48
+00:02:02,1322 --> 00:02:03,1322
+time
+
+49
+00:02:03,1324 --> 00:02:07,028
+We'll also talk some about being able to
+
+50
+00:02:07,030 --> 00:02:09,914
+build the structure faster than just inserting it
+
+51
+00:02:09,916 --> 00:02:11,940
+But of course we could implement build by
+
+52
+00:02:11,942 --> 00:02:13,1486
+starting empty and repeatedly inserting
+
+53
+00:02:13,1488 --> 00:02:17,1562
+And also the complexity of just finding the
+
+54
+00:02:17,1564 --> 00:02:18,1564
+max without deleting it
+
+55
+00:02:18,1566 --> 00:02:21,276
+This you could simulate with these two operations
+
+56
+00:02:21,278 --> 00:02:23,334
+by deleting the max and then reinserting it
+
+57
+00:02:23,1648 --> 00:02:25,912
+Which works
+
+58
+00:02:25,914 --> 00:02:27,1080
+But often we can do faster
+
+59
+00:02:27,1082 --> 00:02:31,1456
+But the two key main operations are insert
+
+60
+00:02:31,1458 --> 00:02:32,1458
+and delete max
+
+61
+00:02:32,1460 --> 00:02:35,860
+And we're going to see a few data
+
+62
+00:02:35,862 --> 00:02:36,862
+structures to do this
+
+63
+00:02:36,1164 --> 00:02:40,996
+Any suggestions among the data structures we've seen
+
+64
+00:02:40,998 --> 00:02:41,998
+in this class?
+
+65
+00:02:41,1000 --> 00:02:45,516
+What should we use to solve priority queue
+
+66
+00:02:45,518 --> 00:02:46,518
+interface?
+
+67
+00:02:49,1136 --> 00:02:55,1104
+Many possible answers
+
+68
+00:02:58,1794 --> 00:02:59,1806
+Sequence AVL
+
+69
+00:02:59,1808 --> 00:03:00,1808
+Oh, that's interesting
+
+70
+00:03:01,150 --> 00:03:03,610
+Sequence AVL is a good answer
+
+71
+00:03:03,612 --> 00:03:06,658
+But it's maybe the fancier version
+
+72
+00:03:06,1800 --> 00:03:07,1800
+Yeah
+
+73
+00:03:08,720 --> 00:03:09,1600
+Set AVL
+
+74
+00:03:09,1872 --> 00:03:10,1872
+Sounds good
+
+75
+00:03:10,1874 --> 00:03:14,260
+Set AVL supports these operations and many more
+
+76
+00:03:14,262 --> 00:03:16,754
+All in log n time, except for build,
+
+77
+00:03:16,756 --> 00:03:18,946
+which takes n log n time
+
+78
+00:03:18,948 --> 00:03:19,1076
+Because you have to sort first
+
+79
+00:03:20,1020 --> 00:03:23,460
+So set AVL is a good way to
+
+80
+00:03:23,462 --> 00:03:24,462
+do this
+
+81
+00:03:24,464 --> 00:03:26,540
+We'll come back to your sequence AVL idea
+
+82
+00:03:26,542 --> 00:03:27,542
+later
+
+83
+00:03:27,544 --> 00:03:31,564
+This gets log n for operation
+
+84
+00:03:31,1484 --> 00:03:32,1484
+Great
+
+85
+00:03:32,1486 --> 00:03:35,246
+I mean, set AVL is our most powerful
+
+86
+00:03:35,248 --> 00:03:36,248
+data structure
+
+87
+00:03:36,250 --> 00:03:37,250
+It does all the operations we care about
+
+88
+00:03:37,762 --> 00:03:38,1318
+On the set side
+
+89
+00:03:38,1320 --> 00:03:40,720
+And the sequence AVL does all the operations
+
+90
+00:03:40,722 --> 00:03:41,722
+on the sequence side
+
+91
+00:03:41,724 --> 00:03:42,868
+But note that this is a set, not
+
+92
+00:03:42,870 --> 00:03:43,870
+a sequence
+
+93
+00:03:43,872 --> 00:03:44,872
+We care about keys
+
+94
+00:03:44,874 --> 00:03:46,048
+There are hacks to get around that with
+
+95
+00:03:46,050 --> 00:03:47,050
+sequence AVLs
+
+96
+00:03:47,052 --> 00:03:48,232
+But let's do that later
+
+97
+00:03:50,026 --> 00:03:51,026
+So great
+
+98
+00:03:51,028 --> 00:03:53,1388
+If we wanted to, for example, speed up
+
+99
+00:03:53,1390 --> 00:03:56,1728
+find max in a set AVL, we could
+
+100
+00:03:56,1730 --> 00:03:57,1970
+add augmentation
+
+101
+00:03:57,1972 --> 00:04:05,1124
+We could remember subtree property augmentations
+
+102
+00:04:05,1126 --> 00:04:08,616
+We can use that to get constant time
+
+103
+00:04:08,618 --> 00:04:13,940
+find max by storing in every node the
+
+104
+00:04:13,942 --> 00:04:15,928
+maximum key item within the subtree
+
+105
+00:04:15,930 --> 00:04:16,1684
+And that's a subtree property
+
+106
+00:04:16,1686 --> 00:04:18,1720
+It's one we mentioned last class
+
+107
+00:04:18,1722 --> 00:04:21,298
+So we could even improve that to constant
+
+108
+00:04:21,300 --> 00:04:22,300
+time
+
+109
+00:04:22,302 --> 00:04:23,302
+Great
+
+110
+00:04:23,304 --> 00:04:24,304
+So we're done
+
+111
+00:04:24,306 --> 00:04:25,306
+End of lecture
+
+112
+00:04:25,308 --> 00:04:26,1532
+In some sense, that's true
+
+113
+00:04:26,1534 --> 00:04:29,434
+But what we're going to see today is
+
+114
+00:04:29,436 --> 00:04:31,420
+another data structure called a binary heap, which
+
+115
+00:04:31,422 --> 00:04:34,1016
+is, in some sense, a simplification of set
+
+116
+00:04:34,1018 --> 00:04:35,1018
+AVL
+
+117
+00:04:35,1020 --> 00:04:37,1636
+It achieves basically the same time bounds
+
+118
+00:04:37,1638 --> 00:04:40,1526
+Build will be faster by a log factor
+
+119
+00:04:40,1528 --> 00:04:44,326
+But that's not the main reason we care
+
+120
+00:04:44,328 --> 00:04:45,328
+about them
+
+121
+00:04:45,330 --> 00:04:46,1126
+The main advantage is that they're simpler
+
+122
+00:04:46,1128 --> 00:04:50,1236
+And they give us an in-place sorting
+
+123
+00:04:50,1238 --> 00:04:51,1238
+algorithm
+
+124
+00:04:53,714 --> 00:04:58,286
+So I have up here the three of
+
+125
+00:04:58,288 --> 00:04:59,1692
+the operations I've been talking about, build, insert,
+
+126
+00:04:59,1694 --> 00:05:00,1694
+and delete max
+
+127
+00:05:00,1696 --> 00:05:03,1686
+So we have set AVL, trees there, n
+
+128
+00:05:03,1688 --> 00:05:06,396
+log n build, log n insert, log n
+
+129
+00:05:06,398 --> 00:05:07,398
+delete
+
+130
+00:05:07,400 --> 00:05:10,1350
+So along the way to our heap, I
+
+131
+00:05:10,1352 --> 00:05:13,214
+want to mention two other data structures
+
+132
+00:05:13,216 --> 00:05:18,132
+One is a dynamic but unsorted array
+
+133
+00:05:18,134 --> 00:05:20,1160
+And the other is a dynamic sorted array
+
+134
+00:05:25,120 --> 00:05:28,1080
+These are simpler data structures we've talked about
+
+135
+00:05:28,1082 --> 00:05:29,1082
+many times before
+
+136
+00:05:29,1084 --> 00:05:32,1486
+And they're useful motivations for getting started
+
+137
+00:05:32,1488 --> 00:05:35,184
+Because a heap is going to be built
+
+138
+00:05:35,186 --> 00:05:39,1750
+on top of arrays instead of a fusion
+
+139
+00:05:39,1752 --> 00:05:40,1752
+between arrays and trees
+
+140
+00:05:42,1852 --> 00:05:47,228
+So if I have an unsorted array, this
+
+141
+00:05:47,230 --> 00:05:48,1178
+is very easy to insert into
+
+142
+00:05:48,1180 --> 00:05:51,1674
+I just append to the end
+
+143
+00:05:51,1676 --> 00:05:53,818
+This is what we called insert last
+
+144
+00:05:53,820 --> 00:05:58,1354
+So insert is fast, constant amortized
+
+145
+00:05:58,1356 --> 00:06:00,468
+We might have to resize the array
+
+146
+00:06:00,470 --> 00:06:02,008
+So that's the amortized part
+
+147
+00:06:02,010 --> 00:06:04,1596
+But delete max is slow in an unsorted
+
+148
+00:06:04,1598 --> 00:06:05,1598
+array
+
+149
+00:06:05,1600 --> 00:06:06,1600
+I don't know where the maximum is
+
+150
+00:06:06,1602 --> 00:06:07,1602
+So I have to scan through the whole
+
+151
+00:06:07,1604 --> 00:06:08,1604
+array
+
+152
+00:06:10,862 --> 00:06:13,1498
+So I scan through the array, identify the
+
+153
+00:06:13,1500 --> 00:06:14,1500
+max is somewhere in the middle
+
+154
+00:06:14,1904 --> 00:06:17,416
+And then if I want to delete it,
+
+155
+00:06:22,714 --> 00:06:24,1446
+I want to delete that maximum element
+
+156
+00:06:24,1448 --> 00:06:26,370
+Well, in a dynamic array, all I can
+
+157
+00:06:26,372 --> 00:06:28,1618
+really do is delete the last element efficiently
+
+158
+00:06:28,1620 --> 00:06:31,894
+So I could, for example, swap it with
+
+159
+00:06:31,896 --> 00:06:33,1016
+the last element
+
+160
+00:06:33,1018 --> 00:06:35,722
+So I take this element and put it
+
+161
+00:06:35,724 --> 00:06:38,1408
+here, and then delete the last element in
+
+162
+00:06:38,1410 --> 00:06:41,1144
+that array, which is pop in Python, or
+
+163
+00:06:41,1146 --> 00:06:43,252
+delete last in our world
+
+164
+00:06:43,254 --> 00:06:48,1908
+So overall, this is linear time, which is
+
+165
+00:06:48,1910 --> 00:06:49,1910
+bad
+
+166
+00:06:49,1912 --> 00:06:52,464
+But I wanted to highlight exactly how it's
+
+167
+00:06:52,466 --> 00:06:53,1508
+done for a reason we'll get to in
+
+168
+00:06:53,1510 --> 00:06:54,1510
+a moment
+
+169
+00:06:54,1512 --> 00:06:56,482
+Sorted array is sort of the reverse
+
+170
+00:06:56,484 --> 00:06:57,1904
+It's very easy to find the max
+
+171
+00:06:57,1968 --> 00:06:58,1968
+Where is it?
+
+172
+00:07:00,1958 --> 00:07:01,1958
+At the end
+
+173
+00:07:02,1026 --> 00:07:03,1026
+Delete max
+
+174
+00:07:03,1028 --> 00:07:06,888
+The maximum element is always the last element
+
+175
+00:07:06,890 --> 00:07:08,1110
+in a increasing sorted array
+
+176
+00:07:10,1352 --> 00:07:14,968
+I guess that's constant amortized, because then I
+
+177
+00:07:14,970 --> 00:07:16,916
+have to delete it, which may incur resizing
+
+178
+00:07:17,1220 --> 00:07:23,1460
+Insert, though, is going to be linear, because
+
+179
+00:07:23,1462 --> 00:07:25,512
+maybe I can binary search to find where
+
+180
+00:07:25,514 --> 00:07:27,1228
+the added item belongs
+
+181
+00:07:27,1230 --> 00:07:34,816
+Let's say I just added this item here
+
+182
+00:07:34,1512 --> 00:07:37,408
+I could binary search to find it, but
+
+183
+00:07:37,410 --> 00:07:38,410
+then I'm going to have to do a
+
+184
+00:07:38,412 --> 00:07:39,412
+big shift
+
+185
+00:07:39,414 --> 00:07:41,580
+So I might as well just swap repeatedly
+
+186
+00:07:41,582 --> 00:07:45,516
+until I find the position where the added
+
+187
+00:07:45,518 --> 00:07:47,1300
+item x belongs
+
+188
+00:07:47,1302 --> 00:07:49,586
+And now I've restored sorted order
+
+189
+00:07:49,588 --> 00:07:52,496
+That takes linear time, which is bad
+
+190
+00:07:52,498 --> 00:07:54,654
+And what we want is somehow the best
+
+191
+00:07:54,656 --> 00:07:55,656
+of these two worlds
+
+192
+00:07:55,1182 --> 00:07:57,1858
+Insert is fast for array
+
+193
+00:07:58,1840 --> 00:08:01,680
+Delete is fast for a sorted array
+
+194
+00:08:01,682 --> 00:08:03,1800
+We can't get constant time for both, but
+
+195
+00:08:03,1802 --> 00:08:05,242
+we can get log n time for both
+
+196
+00:08:05,244 --> 00:08:08,392
+We already know how with set AVL trees
+
+197
+00:08:08,394 --> 00:08:09,394
+But we're going to see a different way
+
+198
+00:08:09,396 --> 00:08:10,396
+to do it today
+
+199
+00:08:10,398 --> 00:08:15,138
+And the main motivation for a different way
+
+200
+00:08:15,140 --> 00:08:17,1926
+to do this is sorting
+
+201
+00:08:17,1928 --> 00:08:21,1780
+So I want to define priority queue sort
+
+202
+00:08:28,1372 --> 00:08:33,348
+So given any data structure that implements a
+
+203
+00:08:33,350 --> 00:08:35,1768
+priority queue interface, in particular, insert and delete
+
+204
+00:08:35,1770 --> 00:08:38,282
+max, I can make a sorting algorithm
+
+205
+00:08:38,284 --> 00:08:39,284
+What do I do?
+
+206
+00:08:39,286 --> 00:08:42,340
+Insert all the items, delete all the items
+
+207
+00:08:42,342 --> 00:08:44,1294
+But because when I delete them, they come
+
+208
+00:08:44,1296 --> 00:08:47,742
+out largest first, I get them in reverse
+
+209
+00:08:47,744 --> 00:08:48,744
+sorted order
+
+210
+00:08:48,746 --> 00:08:50,202
+Then I could reverse in linear time, and
+
+211
+00:08:50,204 --> 00:08:51,460
+I've sorted my items
+
+212
+00:08:51,462 --> 00:08:59,1342
+So we can insert x for x and
+
+213
+00:08:59,1344 --> 00:09:09,260
+a, or build a, and then repeatedly
+
+214
+00:09:09,262 --> 00:09:10,262
+delete max
+
+215
+00:09:16,1192 --> 00:09:19,088
+How much time does this algorithm take?
+
+216
+00:09:19,168 --> 00:09:21,952
+I'm going to introduce some notation here
+
+217
+00:09:21,954 --> 00:09:23,1602
+It takes however long it takes to build
+
+218
+00:09:23,1604 --> 00:09:24,1604
+n items
+
+219
+00:09:24,1606 --> 00:09:29,302
+I'll call that t sub build of n
+
+220
+00:09:29,304 --> 00:09:42,1980
+plus n times the
+
+221
+00:09:42,1982 --> 00:09:43,1982
+time to do a delete max
+
+222
+00:09:44,1974 --> 00:09:49,786
+Or we can write this as n times
+
+223
+00:09:49,788 --> 00:09:53,1200
+time to do an insert plus time to
+
+224
+00:09:53,1202 --> 00:09:54,1202
+do a delete max
+
+225
+00:09:57,1428 --> 00:10:00,812
+So I'm using these t functions to just
+
+226
+00:10:00,814 --> 00:10:04,218
+abstract what are the running times provided by
+
+227
+00:10:04,220 --> 00:10:06,360
+my data structure that implements this interface
+
+228
+00:10:06,362 --> 00:10:08,1236
+Interface says what's correct is, and these t
+
+229
+00:10:08,1238 --> 00:10:10,1226
+functions give me my performance bounds
+
+230
+00:10:10,1228 --> 00:10:12,1740
+So if I plug in each of these
+
+231
+00:10:12,1742 --> 00:10:16,274
+data structures, I get a sorting algorithm
+
+232
+00:10:16,726 --> 00:10:17,1554
+I get AVL sort
+
+233
+00:10:17,1556 --> 00:10:18,1772
+I get array sort
+
+234
+00:10:18,1774 --> 00:10:20,396
+I get assorted array sort
+
+235
+00:10:20,398 --> 00:10:21,1582
+What do those look like?
+
+236
+00:10:21,1584 --> 00:10:23,956
+It turns out many of these are familiar
+
+237
+00:10:25,690 --> 00:10:29,1230
+So set AVLs take log n per operation
+
+238
+00:10:29,1232 --> 00:10:32,132
+So we get an n log n sorting
+
+239
+00:10:32,134 --> 00:10:35,466
+algorithm out of them, which is insert all
+
+240
+00:10:35,468 --> 00:10:36,1250
+of the items into the AVL tree
+
+241
+00:10:36,1252 --> 00:10:38,1132
+I don't want to use AVL build because
+
+242
+00:10:38,1134 --> 00:10:39,1134
+that uses sort
+
+243
+00:10:39,1136 --> 00:10:41,476
+I'm not allowed to sort in order to
+
+244
+00:10:41,478 --> 00:10:42,478
+implement sort
+
+245
+00:10:42,480 --> 00:10:43,1504
+But we saw how to insert into an
+
+246
+00:10:43,1506 --> 00:10:45,660
+AVL tree and keep the thing balanced
+
+247
+00:10:45,702 --> 00:10:47,618
+So that takes log n each
+
+248
+00:10:47,620 --> 00:10:50,374
+And then we can find the max, delete
+
+249
+00:10:50,376 --> 00:10:51,1268
+it, rebalance, and so on
+
+250
+00:10:51,1270 --> 00:10:52,1778
+Total time will be n log n
+
+251
+00:10:52,1780 --> 00:10:54,1464
+This is an algorithm we call AVL sort
+
+252
+00:10:55,170 --> 00:10:57,1990
+It's a bit complicated because AVL trees are
+
+253
+00:10:57,1992 --> 00:10:58,1992
+complicated
+
+254
+00:10:58,1994 --> 00:11:02,1230
+But it gives us optimal comparison bound, n
+
+255
+00:11:02,1232 --> 00:11:03,1232
+log n
+
+256
+00:11:05,096 --> 00:11:08,784
+Now, what about array sort?
+
+257
+00:11:08,786 --> 00:11:11,1390
+So suppose I use an unsorted array
+
+258
+00:11:12,1506 --> 00:11:14,1094
+I insert the item
+
+259
+00:11:14,1096 --> 00:11:16,1212
+So if I insert the items, so I'm
+
+260
+00:11:16,1214 --> 00:11:18,260
+doing all the insertions here before all the
+
+261
+00:11:18,262 --> 00:11:19,262
+deletions
+
+262
+00:11:19,264 --> 00:11:20,264
+So what's going to happen is I just
+
+263
+00:11:20,266 --> 00:11:21,1700
+insert the items in the original array order
+
+264
+00:11:21,1702 --> 00:11:23,226
+In other words, I just take the array
+
+265
+00:11:23,228 --> 00:11:27,1824
+And then what I do is repeatedly extract
+
+266
+00:11:27,1826 --> 00:11:33,1998
+the maximum item by searching for it, moving
+
+267
+00:11:34,000 --> 00:11:35,092
+it to the end of the array, and
+
+268
+00:11:35,094 --> 00:11:36,480
+then repeating that process
+
+269
+00:11:36,482 --> 00:11:37,482
+That sound familiar?
+
+270
+00:11:37,988 --> 00:11:42,1212
+That's selection sort from lecture three
+
+271
+00:11:43,340 --> 00:11:48,620
+So this arrays give us selection sort
+
+272
+00:11:52,1842 --> 00:11:54,1758
+This is a new way to think about
+
+273
+00:11:54,1760 --> 00:11:56,1156
+what we were doing way back then
+
+274
+00:11:56,1158 --> 00:12:01,1674
+With a sorted array, what are we doing?
+
+275
+00:12:01,1676 --> 00:12:02,1990
+We insert all the items
+
+276
+00:12:02,1992 --> 00:12:05,410
+That's actually where all the work happens because
+
+277
+00:12:05,412 --> 00:12:06,740
+we maintain the sorted array
+
+278
+00:12:06,742 --> 00:12:08,028
+So we start with an empty array
+
+279
+00:12:08,030 --> 00:12:09,030
+It's sorted
+
+280
+00:12:09,032 --> 00:12:10,032
+We add an item
+
+281
+00:12:10,034 --> 00:12:11,034
+OK, still sorted
+
+282
+00:12:11,036 --> 00:12:12,036
+We add a second item
+
+283
+00:12:12,038 --> 00:12:13,172
+And we swap if we need to in
+
+284
+00:12:13,174 --> 00:12:14,174
+order to sort
+
+285
+00:12:14,176 --> 00:12:15,946
+In general, when we add an item, we
+
+286
+00:12:15,948 --> 00:12:17,568
+swap it to the left until it's sorted
+
+287
+00:12:17,570 --> 00:12:18,570
+again
+
+288
+00:12:18,572 --> 00:12:20,260
+That is insertion sort
+
+289
+00:12:25,1240 --> 00:12:26,1360
+Kind of cool
+
+290
+00:12:26,1362 --> 00:12:31,382
+This is a unifying framework for three sorting
+
+291
+00:12:31,384 --> 00:12:32,714
+algorithms that we saw before
+
+292
+00:12:32,716 --> 00:12:34,1860
+We didn't actually talk about AVL sort last
+
+293
+00:12:34,1862 --> 00:12:35,1862
+time, but it was in the notes
+
+294
+00:12:35,1864 --> 00:12:38,1016
+And so that is the right part of
+
+295
+00:12:38,1018 --> 00:12:39,1018
+this table
+
+296
+00:12:39,1020 --> 00:12:42,142
+So of course, these array data structures are
+
+297
+00:12:42,144 --> 00:12:43,144
+not efficient
+
+298
+00:12:43,146 --> 00:12:44,952
+They take linear time for some of the
+
+299
+00:12:44,954 --> 00:12:46,756
+operations, so the sorting algorithms are not efficient
+
+300
+00:12:46,758 --> 00:12:48,452
+But they're ones we've seen before, so it's
+
+301
+00:12:48,454 --> 00:12:49,798
+neat to see how they fit in here
+
+302
+00:12:49,1302 --> 00:12:52,578
+They had the selection sort and insertion sort
+
+303
+00:12:52,580 --> 00:12:53,1938
+had the advantage that they were in place
+
+304
+00:12:53,1940 --> 00:12:56,058
+You just needed a constant number of pointers
+
+305
+00:12:56,060 --> 00:12:59,864
+or indices beyond the array itself
+
+306
+00:12:59,866 --> 00:13:00,1686
+So they're very space efficient
+
+307
+00:13:00,1688 --> 00:13:02,1074
+So that was a plus for them
+
+308
+00:13:02,1076 --> 00:13:04,536
+But they take n squared time, so you
+
+309
+00:13:04,538 --> 00:13:05,538
+should never use them
+
+310
+00:13:05,540 --> 00:13:07,1642
+Except for n at most 100 or something
+
+311
+00:13:08,1804 --> 00:13:12,1036
+AVL tree sort is great in that it
+
+312
+00:13:12,1038 --> 00:13:13,1038
+gets n log n time
+
+313
+00:13:13,1040 --> 00:13:16,954
+Probably more complicated than merge sort, and you
+
+314
+00:13:16,956 --> 00:13:17,956
+could stick to merge sort
+
+315
+00:13:17,958 --> 00:13:20,242
+But neither merge sort nor set AVL tree
+
+316
+00:13:20,244 --> 00:13:21,1506
+sort are in place
+
+317
+00:13:21,1508 --> 00:13:25,364
+And so the goal of today is to
+
+318
+00:13:25,366 --> 00:13:26,1034
+get the best of all those worlds in
+
+319
+00:13:26,1036 --> 00:13:29,332
+sorting to get n log n comparisons, which
+
+320
+00:13:29,334 --> 00:13:31,1576
+is optimal in the comparison model, but get
+
+321
+00:13:31,1578 --> 00:13:32,1578
+it to be in place
+
+322
+00:13:32,1580 --> 00:13:35,544
+And that's what we're going to get with
+
+323
+00:13:35,546 --> 00:13:36,546
+binary heaps
+
+324
+00:13:38,058 --> 00:13:41,1182
+We're going to design a data structure that
+
+325
+00:13:41,1184 --> 00:13:43,156
+happens to build a little bit faster, as
+
+326
+00:13:43,158 --> 00:13:44,486
+I mentioned, linear time building
+
+327
+00:13:44,1686 --> 00:13:47,1994
+So it's not representing a sorted order in
+
+328
+00:13:47,1996 --> 00:13:49,416
+the same way that AVL trees are
+
+329
+00:13:49,698 --> 00:13:51,1102
+But it will be kind of tree based
+
+330
+00:13:51,1104 --> 00:13:53,266
+It will also be array based
+
+331
+00:13:53,296 --> 00:13:56,224
+We're going to get logarithmic time for insert
+
+332
+00:13:56,226 --> 00:13:57,226
+and delete max
+
+333
+00:13:57,228 --> 00:13:58,1062
+This happens to be amortized because we use
+
+334
+00:13:58,1064 --> 00:13:59,1064
+arrays
+
+335
+00:13:59,1118 --> 00:14:02,882
+But the key thing is that it's an
+
+336
+00:14:02,884 --> 00:14:03,1612
+in-place data structure
+
+337
+00:14:03,1614 --> 00:14:06,1402
+It only consists of an array of the
+
+338
+00:14:06,1404 --> 00:14:07,1404
+items
+
+339
+00:14:07,1406 --> 00:14:09,1244
+And so when we plug it into our
+
+340
+00:14:09,1246 --> 00:14:13,744
+sorting algorithm, priority queue sort, our generic sorting
+
+341
+00:14:13,746 --> 00:14:15,428
+algorithm, not only do we get n log
+
+342
+00:14:15,430 --> 00:14:17,068
+n performance, but we also get an in
+
+343
+00:14:17,070 --> 00:14:18,1364
+-place sorting algorithm
+
+344
+00:14:18,1366 --> 00:14:20,1806
+This will be our first and only in
+
+345
+00:14:20,1808 --> 00:14:23,932
+this class, n log n in-place sorting
+
+346
+00:14:23,934 --> 00:14:24,934
+algorithm
+
+347
+00:14:24,936 --> 00:14:25,936
+Cool
+
+348
+00:14:27,012 --> 00:14:28,188
+That's the goal
+
+349
+00:14:28,190 --> 00:14:29,190
+Cool
+
+350
+00:14:29,1564 --> 00:14:31,716
+Let's do it
+
+351
+00:14:31,718 --> 00:14:36,1570
+So what we're going to do, because we're
+
+352
+00:14:36,1572 --> 00:14:37,1912
+in place, basically we have to have an
+
+353
+00:14:37,1914 --> 00:14:39,1784
+array storing our n items
+
+354
+00:14:39,1786 --> 00:14:41,1526
+That's sort of the definition of in-place,
+
+355
+00:14:41,1528 --> 00:14:45,1102
+just using n slots of memory, exactly the
+
+356
+00:14:45,1104 --> 00:14:47,1044
+size of the number of items in our
+
+357
+00:14:47,1046 --> 00:14:48,1046
+structure
+
+358
+00:14:48,1048 --> 00:14:49,1152
+But we're obviously not going to use a
+
+359
+00:14:49,1154 --> 00:14:52,944
+regular unsorted array or a regular sorted array
+
+360
+00:14:52,1110 --> 00:14:54,1570
+We're going to use array just as sort
+
+361
+00:14:54,1572 --> 00:14:58,390
+of the underlying technology for how things are
+
+362
+00:14:58,392 --> 00:14:59,392
+stored
+
+363
+00:14:59,394 --> 00:15:01,1256
+But we'd really like logarithmic performance, which should
+
+364
+00:15:01,1258 --> 00:15:02,1258
+make you think tree
+
+365
+00:15:02,1260 --> 00:15:04,1068
+Only way to get a log is with
+
+366
+00:15:04,1070 --> 00:15:05,1332
+the binary tree, more or less
+
+367
+00:15:07,1352 --> 00:15:09,288
+So tree
+
+368
+00:15:09,290 --> 00:15:14,924
+Somehow, we want to embed a tree into
+
+369
+00:15:14,926 --> 00:15:15,926
+an array
+
+370
+00:15:15,928 --> 00:15:16,928
+Let me grab an example
+
+371
+00:15:23,276 --> 00:15:26,1564
+Let me draw a tree
+
+372
+00:15:43,1964 --> 00:15:46,1076
+If I got to choose any old tree
+
+373
+00:15:46,1078 --> 00:15:49,1762
+I want, I would choose a tree that's
+
+374
+00:15:49,1764 --> 00:15:51,888
+basically perfectly balanced
+
+375
+00:15:51,890 --> 00:15:56,024
+Perfectly balanced would be like this, where what's
+
+376
+00:15:56,026 --> 00:15:57,026
+the property?
+
+377
+00:15:57,028 --> 00:15:59,1152
+That I have all of these levels, all
+
+378
+00:15:59,1154 --> 00:16:01,1554
+of these depths are completely filled with nodes
+
+379
+00:16:01,1556 --> 00:16:03,644
+This is depth 0
+
+380
+00:16:05,164 --> 00:16:07,1276
+Remember, this is depth 1
+
+381
+00:16:07,1278 --> 00:16:08,1962
+This is depth 2
+
+382
+00:16:09,046 --> 00:16:10,1634
+This is depth 3
+
+383
+00:16:10,1636 --> 00:16:14,1188
+So what I'd really like is to have
+
+384
+00:16:14,1190 --> 00:16:20,808
+2 to the i nodes at depth i
+
+385
+00:16:20,810 --> 00:16:24,828
+That would be a perfect binary tree
+
+386
+00:16:24,1172 --> 00:16:27,828
+But that only works when n is 1
+
+387
+00:16:27,830 --> 00:16:28,830
+less than a power of 2
+
+388
+00:16:28,832 --> 00:16:31,1180
+I can't always achieve that for any n
+
+389
+00:16:31,1182 --> 00:16:33,906
+And so the next best thing I could
+
+390
+00:16:33,908 --> 00:16:36,1298
+hope for is 2 to the i nodes
+
+391
+00:16:36,1300 --> 00:16:38,1384
+at depth i until the very last i,
+
+392
+00:16:38,1386 --> 00:16:39,1386
+the largest depth
+
+393
+00:16:39,1388 --> 00:16:43,756
+And in that level, I'm still going to
+
+394
+00:16:43,758 --> 00:16:44,758
+restrict things
+
+395
+00:16:44,760 --> 00:16:45,1236
+I'm going to force all of the nodes
+
+396
+00:16:45,1238 --> 00:16:47,368
+to be as far left as possible
+
+397
+00:16:47,1358 --> 00:16:54,1282
+So I want to say, except at max
+
+398
+00:16:54,1284 --> 00:17:05,1040
+depth, where nodes are, I'll
+
+399
+00:17:05,1042 --> 00:17:06,1042
+call them, left justified
+
+400
+00:17:06,1044 --> 00:17:14,1032
+And these two properties together is what I
+
+401
+00:17:14,1034 --> 00:17:15,1034
+call a complete binary tree
+
+402
+00:17:27,378 --> 00:17:29,022
+Why is this interesting?
+
+403
+00:17:29,024 --> 00:17:32,1678
+Because I claim I can represent a tree
+
+404
+00:17:32,1680 --> 00:17:34,584
+like this as an array
+
+405
+00:17:34,878 --> 00:17:39,722
+I've narrowed things down enough that I can
+
+406
+00:17:39,724 --> 00:17:40,724
+draw an array down here
+
+407
+00:17:40,1252 --> 00:17:43,148
+And what I'm going to do is write
+
+408
+00:17:43,150 --> 00:17:44,1464
+these nodes in depth order
+
+409
+00:17:44,1616 --> 00:17:47,784
+So I'll write a first, because that's depth
+
+410
+00:17:47,786 --> 00:17:48,786
+0
+
+411
+00:17:48,788 --> 00:17:50,012
+Then bc, that's depth 1
+
+412
+00:17:50,728 --> 00:17:53,872
+Then, well, they're alphabetical
+
+413
+00:17:53,874 --> 00:17:54,874
+I made it that way
+
+414
+00:17:55,1514 --> 00:17:58,246
+defg is depth 2
+
+415
+00:17:58,248 --> 00:18:01,092
+And then hij is depth 3
+
+416
+00:18:02,904 --> 00:18:06,136
+This is very different from traversal order of
+
+417
+00:18:06,138 --> 00:18:07,138
+a tree
+
+418
+00:18:07,140 --> 00:18:08,976
+Traversal order would have been h, d, i,
+
+419
+00:18:08,978 --> 00:18:10,1862
+b, j, e, a, f, c, g
+
+420
+00:18:10,1864 --> 00:18:13,1912
+OK, but this is what we might call
+
+421
+00:18:13,1914 --> 00:18:14,1914
+depth order
+
+422
+00:18:14,1916 --> 00:18:17,050
+Do the lowest depth nodes first
+
+423
+00:18:17,350 --> 00:18:20,930
+Very different way to lay things out or
+
+424
+00:18:20,932 --> 00:18:22,1298
+to linearize our data
+
+425
+00:18:23,1310 --> 00:18:26,1890
+And this is what a heap is going
+
+426
+00:18:26,1892 --> 00:18:27,1892
+to look like
+
+427
+00:18:27,1894 --> 00:18:34,564
+So the cool thing is, between complete binary
+
+428
+00:18:34,566 --> 00:18:36,1452
+trees and arrays is a bijection
+
+429
+00:18:36,1454 --> 00:18:39,1024
+For every array, there's a unique complete binary
+
+430
+00:18:39,1026 --> 00:18:40,1026
+tree
+
+431
+00:18:40,1028 --> 00:18:41,1964
+And for every complete binary tree, there's a
+
+432
+00:18:41,1966 --> 00:18:42,1966
+unique array
+
+433
+00:18:43,412 --> 00:18:44,412
+Why?
+
+434
+00:18:44,414 --> 00:18:49,022
+Because the complete constraint forces everything, forces my
+
+435
+00:18:49,024 --> 00:18:50,024
+hand
+
+436
+00:18:50,026 --> 00:18:51,026
+There's only, if I give you a number
+
+437
+00:18:51,028 --> 00:18:53,736
+n, there is one tree shape of size
+
+438
+00:18:53,738 --> 00:18:54,738
+n
+
+439
+00:18:54,740 --> 00:18:57,306
+You just fill in the nodes, top down,
+
+440
+00:18:57,308 --> 00:18:58,308
+until you get to the last level
+
+441
+00:18:58,310 --> 00:18:59,310
+And then you have to fill them in
+
+442
+00:18:59,312 --> 00:19:01,1204
+left to right, what you might call reading
+
+443
+00:19:01,1206 --> 00:19:03,1626
+order for writing down nodes
+
+444
+00:19:03,1628 --> 00:19:06,1632
+And the array is telling you which keys
+
+445
+00:19:06,1634 --> 00:19:07,1634
+go where
+
+446
+00:19:07,1636 --> 00:19:08,1636
+This is the first node you write down
+
+447
+00:19:08,1638 --> 00:19:09,1638
+at the root
+
+448
+00:19:09,1640 --> 00:19:10,1972
+This is the next node you write down
+
+449
+00:19:10,1974 --> 00:19:12,1020
+at the left child of the root, and
+
+450
+00:19:12,1022 --> 00:19:13,1022
+so on
+
+451
+00:19:13,1024 --> 00:19:16,1116
+So here we have a binary tree represented
+
+452
+00:19:16,1118 --> 00:19:19,174
+as an array, or an array representing a
+
+453
+00:19:19,176 --> 00:19:20,176
+binary tree
+
+454
+00:19:20,178 --> 00:19:22,1910
+The very specific binary tree, it has a
+
+455
+00:19:22,1912 --> 00:19:25,1892
+clear advantage, which is it is guaranteed balanced
+
+456
+00:19:25,1894 --> 00:19:29,084
+No rotation is necessary in heaps, because complete
+
+457
+00:19:29,086 --> 00:19:30,086
+binary trees are always balanced
+
+458
+00:19:30,088 --> 00:19:31,1294
+In fact, they have the best height they
+
+459
+00:19:31,1296 --> 00:19:36,038
+possibly could, which is ceiling of log n
+
+460
+00:19:39,420 --> 00:19:41,1260
+Balanced, remember, just meant you were big O
+
+461
+00:19:41,1262 --> 00:19:42,1262
+of log n
+
+462
+00:19:42,1264 --> 00:19:44,1310
+This is 1 times log n
+
+463
+00:19:44,1312 --> 00:19:47,560
+So it's the best level of balance you
+
+464
+00:19:47,562 --> 00:19:48,562
+could hope for
+
+465
+00:19:48,564 --> 00:19:52,090
+So somehow, I claim, we can maintain a
+
+466
+00:19:52,092 --> 00:19:54,1246
+complete binary tree for solving priority queues
+
+467
+00:19:54,1248 --> 00:19:55,1636
+This would not be possible if you were
+
+468
+00:19:55,1638 --> 00:19:57,632
+trying to solve the whole set interface
+
+469
+00:19:57,768 --> 00:19:59,192
+And that's kind of the cool thing about
+
+470
+00:19:59,194 --> 00:20:01,1072
+heaps, is that by just focusing on the
+
+471
+00:20:01,1074 --> 00:20:05,330
+subset of the set interface, we can do
+
+472
+00:20:05,332 --> 00:20:06,332
+more
+
+473
+00:20:06,334 --> 00:20:07,680
+We can maintain this very strong property
+
+474
+00:20:07,906 --> 00:20:09,1094
+And because we have this very strong property,
+
+475
+00:20:09,1096 --> 00:20:10,1996
+we don't even need to store this tree
+
+476
+00:20:10,1998 --> 00:20:12,706
+We're not going to store left and right
+
+477
+00:20:12,708 --> 00:20:14,508
+pointers and parent pointers
+
+478
+00:20:14,510 --> 00:20:15,1320
+We're just going to store the array
+
+479
+00:20:15,1668 --> 00:20:19,1172
+This is what we call an implicit data
+
+480
+00:20:19,1174 --> 00:20:30,1236
+structure, which
+
+481
+00:20:30,1238 --> 00:20:39,912
+basically means no pointers, just an array of
+
+482
+00:20:39,914 --> 00:20:40,914
+the n items
+
+483
+00:20:43,1120 --> 00:20:45,1200
+How are we going to get away without
+
+484
+00:20:45,1202 --> 00:20:46,1202
+storing pointers?
+
+485
+00:20:46,1204 --> 00:20:48,1332
+I'd still like to treat it like a
+
+486
+00:20:48,1334 --> 00:20:49,1334
+tree
+
+487
+00:20:49,1336 --> 00:20:51,1170
+I'd still like to know the left child
+
+488
+00:20:51,1172 --> 00:20:53,358
+of B is D and the right child
+
+489
+00:20:53,360 --> 00:20:54,360
+of B is E
+
+490
+00:20:54,362 --> 00:20:55,1168
+We'll see why in a moment
+
+491
+00:20:55,1170 --> 00:21:01,1712
+Well, we can do this with index arithmetic
+
+492
+00:21:02,1848 --> 00:21:06,1192
+So maybe I should add some labels before
+
+493
+00:21:06,1194 --> 00:21:07,1194
+I get there
+
+494
+00:21:10,1032 --> 00:21:14,048
+So this array naturally has indices
+
+495
+00:21:14,050 --> 00:21:15,730
+This is index 0
+
+496
+00:21:15,1524 --> 00:21:19,756
+This is index 1, index 2, index 3,
+
+497
+00:21:19,758 --> 00:21:23,568
+index 4, index 5, index 6, 7, 8,
+
+498
+00:21:23,570 --> 00:21:26,1868
+9, because there are 10 items, 0 through
+
+499
+00:21:26,1870 --> 00:21:27,1870
+9
+
+500
+00:21:27,1872 --> 00:21:29,1360
+And I can apply those labels up here,
+
+501
+00:21:29,1362 --> 00:21:30,1362
+too
+
+502
+00:21:30,1364 --> 00:21:31,1364
+These are the same nodes
+
+503
+00:21:31,1366 --> 00:21:32,1534
+So 0, 1, 2
+
+504
+00:21:32,1536 --> 00:21:34,862
+This is just depth order
+
+505
+00:21:36,650 --> 00:21:38,1110
+But once I have this labeling, it's going
+
+506
+00:21:38,1112 --> 00:21:39,1304
+to be a lot easier to figure things
+
+507
+00:21:39,1306 --> 00:21:40,1306
+out
+
+508
+00:21:40,1308 --> 00:21:41,1308
+So if I wanted to know the left
+
+509
+00:21:41,1310 --> 00:21:44,550
+child of B is D, somehow, given the
+
+510
+00:21:44,552 --> 00:21:46,1216
+number 1, I want to compute the number
+
+511
+00:21:46,1218 --> 00:21:47,1218
+3
+
+512
+00:21:47,1220 --> 00:21:53,1388
+3, add 2, multiply by 3
+
+513
+00:21:53,1390 --> 00:21:54,1390
+There are all sorts of operations that take
+
+514
+00:21:54,1392 --> 00:21:55,1392
+1 and turn it into 3
+
+515
+00:21:55,1394 --> 00:21:57,1048
+But there's only one that's going to work
+
+516
+00:21:57,1050 --> 00:21:58,1050
+in all cases
+
+517
+00:21:58,1052 --> 00:22:00,1556
+And the intuition here is, well, I have
+
+518
+00:22:00,1558 --> 00:22:02,656
+2 to the i nodes at level i
+
+519
+00:22:02,658 --> 00:22:03,1932
+If I want to go to the child
+
+520
+00:22:03,1934 --> 00:22:06,152
+level, there's 2 to the i plus 1
+
+521
+00:22:06,154 --> 00:22:08,254
+nodes down there, exactly double
+
+522
+00:22:08,256 --> 00:22:10,436
+Except the very last one, but that won't
+
+523
+00:22:10,438 --> 00:22:11,438
+really matter
+
+524
+00:22:11,440 --> 00:22:12,892
+If there is a left child, it will
+
+525
+00:22:12,894 --> 00:22:13,894
+behave the same
+
+526
+00:22:13,896 --> 00:22:15,590
+And so intuitively, I have this space of
+
+527
+00:22:15,592 --> 00:22:16,592
+size 2 to the i
+
+528
+00:22:16,594 --> 00:22:17,798
+I have to expand it to a space
+
+529
+00:22:17,800 --> 00:22:19,292
+of size 2 to the i plus 1
+
+530
+00:22:19,294 --> 00:22:21,578
+So I should multiply by 2
+
+531
+00:22:22,020 --> 00:22:23,1500
+And that's almost right
+
+532
+00:22:23,1502 --> 00:22:26,516
+But then there's some constants
+
+533
+00:22:26,994 --> 00:22:29,486
+So I'd like to say 2 times i
+
+534
+00:22:29,488 --> 00:22:31,1770
+But if we look at the examples here,
+
+535
+00:22:31,1772 --> 00:22:35,218
+1 times 2 is 2, which is 1
+
+536
+00:22:35,220 --> 00:22:36,220
+less than 3
+
+537
+00:22:36,222 --> 00:22:38,208
+2 times 2 is 4, which is 1
+
+538
+00:22:38,210 --> 00:22:39,210
+less than 5
+
+539
+00:22:39,212 --> 00:22:40,212
+Hey, we almost got it right
+
+540
+00:22:40,214 --> 00:22:41,214
+It's just off by 1
+
+541
+00:22:43,1916 --> 00:22:47,1204
+1 is index errors are the most common
+
+542
+00:22:47,1206 --> 00:22:48,1206
+things in computer science
+
+543
+00:22:50,696 --> 00:22:51,1904
+What about the right child?
+
+544
+00:22:53,1622 --> 00:22:55,1538
+If the left child is a 2i plus
+
+545
+00:22:55,1540 --> 00:22:56,1540
+1, where's the right child?
+
+546
+00:22:59,778 --> 00:23:00,1062
+I hear lots of mumbles
+
+547
+00:23:00,1064 --> 00:23:01,1064
+2i plus 2
+
+548
+00:23:02,1996 --> 00:23:03,1996
+One more
+
+549
+00:23:03,1998 --> 00:23:05,1656
+Because we're writing things left to right in
+
+550
+00:23:05,1658 --> 00:23:08,1592
+depth order, the right child is the right
+
+551
+00:23:08,1594 --> 00:23:09,1714
+sibling of the left child
+
+552
+00:23:09,1716 --> 00:23:11,442
+So it's just one larger
+
+553
+00:23:11,444 --> 00:23:16,150
+Given those rules, we can also compute parent
+
+554
+00:23:16,152 --> 00:23:18,1696
+It's just whatever is the inverse of both
+
+555
+00:23:18,1698 --> 00:23:23,1568
+of these functions, which I want to divide
+
+556
+00:23:23,1570 --> 00:23:24,1570
+by 2 at some point
+
+557
+00:23:24,1572 --> 00:23:27,356
+But I want to get back to i
+
+558
+00:23:27,358 --> 00:23:29,116
+given 2i plus 1 or given 2i plus
+
+559
+00:23:29,118 --> 00:23:30,118
+2
+
+560
+00:23:30,120 --> 00:23:35,1238
+And so if I subtract 1 from i,
+
+561
+00:23:35,1240 --> 00:23:37,1738
+then I either get 2i or 2i plus
+
+562
+00:23:37,1740 --> 00:23:38,1740
+1
+
+563
+00:23:38,1742 --> 00:23:40,698
+And then if I take an integer division
+
+564
+00:23:40,700 --> 00:23:43,1692
+by 2, I get i, the original i
+
+565
+00:23:43,1694 --> 00:23:46,330
+Sorry, maybe I'll call this j to be
+
+566
+00:23:46,332 --> 00:23:47,332
+clearer
+
+567
+00:23:47,334 --> 00:23:49,402
+So j is the left or right child
+
+568
+00:23:49,404 --> 00:23:51,1810
+Then I can reconstruct i, which was the
+
+569
+00:23:51,1812 --> 00:23:52,1812
+parent
+
+570
+00:23:52,1814 --> 00:23:56,1072
+So this is a constant number arithmetic operation
+
+571
+00:23:56,1074 --> 00:23:58,1040
+So I don't have to store left and
+
+572
+00:23:58,1042 --> 00:23:59,1042
+right pointers
+
+573
+00:23:59,1044 --> 00:24:00,1044
+I can just compute them whenever I need
+
+574
+00:24:00,1046 --> 00:24:01,1046
+them
+
+575
+00:24:01,1048 --> 00:24:03,1636
+Whenever I'm at some node like E, and
+
+576
+00:24:03,1638 --> 00:24:04,1808
+I want to know what's its left child,
+
+577
+00:24:04,1812 --> 00:24:09,788
+sorry, given the node index 4, which happens
+
+578
+00:24:09,790 --> 00:24:12,112
+to contain the item E, and I want
+
+579
+00:24:12,114 --> 00:24:13,114
+to know what's its left child, I just
+
+580
+00:24:13,116 --> 00:24:14,116
+multiply by 2 and add 1
+
+581
+00:24:14,118 --> 00:24:15,118
+I get 9
+
+582
+00:24:15,120 --> 00:24:16,1818
+Then I can index into this array at
+
+583
+00:24:16,1820 --> 00:24:19,014
+position 9, because this is just in my
+
+584
+00:24:19,016 --> 00:24:20,016
+head
+
+585
+00:24:20,018 --> 00:24:22,890
+Remember, we're just thinking that there's a tree
+
+586
+00:24:22,892 --> 00:24:23,892
+here
+
+587
+00:24:23,894 --> 00:24:25,420
+But in reality, on the computer, there's just
+
+588
+00:24:25,422 --> 00:24:26,422
+the array
+
+589
+00:24:26,424 --> 00:24:28,142
+So if we want to go from E
+
+590
+00:24:28,144 --> 00:24:30,374
+to j, we can, from 4 to 9
+
+591
+00:24:30,376 --> 00:24:32,670
+If we try to go to the right
+
+592
+00:24:32,672 --> 00:24:34,1980
+child, we multiply by 2, 8, add 2,
+
+593
+00:24:34,1982 --> 00:24:35,1982
+10
+
+594
+00:24:35,1984 --> 00:24:37,394
+And we see, oh, 10 is beyond the
+
+595
+00:24:37,396 --> 00:24:38,396
+end of the array
+
+596
+00:24:38,398 --> 00:24:39,620
+But our array stores its size
+
+597
+00:24:39,622 --> 00:24:41,008
+So we realize, oh, E does not have
+
+598
+00:24:41,010 --> 00:24:42,010
+a right child
+
+599
+00:24:42,012 --> 00:24:43,1812
+This is something you can only do in
+
+600
+00:24:43,1814 --> 00:24:44,1814
+a complete binary tree
+
+601
+00:24:44,1816 --> 00:24:46,1916
+In a general binary tree, you don't have
+
+602
+00:24:46,1918 --> 00:24:47,1918
+these nice properties
+
+603
+00:24:49,1162 --> 00:24:50,1162
+Cool
+
+604
+00:24:50,1444 --> 00:24:54,676
+So this is basically a heap
+
+605
+00:24:54,678 --> 00:24:56,418
+I just need to add one more property,
+
+606
+00:24:58,132 --> 00:25:00,428
+naturally, called the heap property
+
+607
+00:25:05,1284 --> 00:25:09,1716
+So there are multiple types of heaps
+
+608
+00:25:09,1718 --> 00:25:11,816
+This type of heap is called a binary
+
+609
+00:25:11,818 --> 00:25:12,818
+heap
+
+610
+00:25:12,820 --> 00:25:14,210
+We will talk about others in future lectures
+
+611
+00:25:14,736 --> 00:25:15,1944
+I'm going to call it Q
+
+612
+00:25:16,626 --> 00:25:29,1334
+Maybe I should write the explicit
+
+613
+00:25:29,1336 --> 00:25:30,1336
+thing
+
+614
+00:25:30,1338 --> 00:25:34,204
+This is an array representing a complete binary
+
+615
+00:25:34,206 --> 00:25:51,864
+tree called the
+
+616
+00:25:51,866 --> 00:25:52,866
+array Q
+
+617
+00:25:52,868 --> 00:25:59,290
+And we want every node to satisfy
+
+618
+00:25:59,292 --> 00:26:20,884
+the so-called max heap property, which
+
+619
+00:26:20,886 --> 00:26:21,1144
+says Q of i is greater than or
+
+620
+00:26:21,1146 --> 00:26:26,642
+equal to Q of j for both children
+
+621
+00:26:26,644 --> 00:26:30,1222
+left of i and right of i
+
+622
+00:26:37,230 --> 00:26:44,210
+So we have a node, i, and has
+
+623
+00:26:44,212 --> 00:26:47,052
+two children, 2i plus 1 and 2i plus
+
+624
+00:26:47,054 --> 00:26:48,054
+2
+
+625
+00:26:48,056 --> 00:26:50,1212
+These are our two values of j
+
+626
+00:26:52,1138 --> 00:26:56,862
+What we want is a greater than or
+
+627
+00:26:56,864 --> 00:26:59,494
+equal to relation here and here
+
+628
+00:26:59,1218 --> 00:27:01,1622
+So this node should be bigger than both
+
+629
+00:27:01,1624 --> 00:27:02,1624
+this one and this one
+
+630
+00:27:02,1626 --> 00:27:03,1626
+Which of these is larger?
+
+631
+00:27:03,1628 --> 00:27:04,1628
+We don't know
+
+632
+00:27:04,1630 --> 00:27:05,1630
+And we don't care
+
+633
+00:27:05,1632 --> 00:27:09,422
+Very different from binary search trees or set
+
+634
+00:27:09,424 --> 00:27:11,1520
+binary trees, where we said these guys were
+
+635
+00:27:11,1522 --> 00:27:12,1856
+less than or equal to this one
+
+636
+00:27:12,1858 --> 00:27:14,570
+This one was less than or equal to
+
+637
+00:27:14,572 --> 00:27:15,850
+all the nodes in the subtree
+
+638
+00:27:15,852 --> 00:27:17,1348
+Here, we're just locally saying this node is
+
+639
+00:27:17,1350 --> 00:27:19,988
+greater than or equal to this node and
+
+640
+00:27:19,990 --> 00:27:20,990
+this node
+
+641
+00:27:20,992 --> 00:27:21,1990
+So the biggest is at the top
+
+642
+00:27:24,1924 --> 00:27:31,1796
+So one nice lemma about these heaps, this
+
+643
+00:27:31,1798 --> 00:27:32,1798
+is weird
+
+644
+00:27:33,752 --> 00:27:35,1048
+Let me give you some more intuition
+
+645
+00:27:36,272 --> 00:27:38,1168
+If you are a binary heap, if you
+
+646
+00:27:38,1170 --> 00:27:41,892
+satisfy this max heap property everywhere, then, in
+
+647
+00:27:41,894 --> 00:27:45,1360
+fact, you learn that every node i is
+
+648
+00:27:45,1362 --> 00:27:48,196
+greater than or equal to all nodes in
+
+649
+00:27:48,198 --> 00:27:49,198
+its subtree
+
+650
+00:27:49,200 --> 00:27:56,756
+These are what we call descendants and subtree
+
+651
+00:27:56,758 --> 00:27:57,758
+of i
+
+652
+00:27:59,1142 --> 00:28:03,1138
+Let me look at this example
+
+653
+00:28:03,1140 --> 00:28:05,612
+So I haven't written any numbers here, but
+
+654
+00:28:05,614 --> 00:28:06,614
+you can imagine
+
+655
+00:28:06,616 --> 00:28:09,1030
+So a here is greater than or equal
+
+656
+00:28:09,1032 --> 00:28:10,1032
+to both b and c
+
+657
+00:28:10,1074 --> 00:28:12,446
+And b is greater than or equal to
+
+658
+00:28:12,448 --> 00:28:13,448
+d and e
+
+659
+00:28:13,450 --> 00:28:14,558
+And c is greater than or equal to
+
+660
+00:28:14,560 --> 00:28:15,560
+f and g
+
+661
+00:28:15,562 --> 00:28:16,562
+And d is greater than or equal to
+
+662
+00:28:16,564 --> 00:28:17,564
+h and i
+
+663
+00:28:17,566 --> 00:28:18,566
+And e is greater than or equal to
+
+664
+00:28:18,568 --> 00:28:19,568
+j
+
+665
+00:28:19,570 --> 00:28:20,1336
+That would make this structure a heap, not
+
+666
+00:28:20,1338 --> 00:28:21,1338
+just a complete binary tree
+
+667
+00:28:23,398 --> 00:28:24,1442
+So what does that imply?
+
+668
+00:28:24,1444 --> 00:28:26,1858
+It implies that a must be the maximum
+
+669
+00:28:26,1896 --> 00:28:28,1704
+So you look at any node here, like
+
+670
+00:28:28,1706 --> 00:28:31,532
+j, a is greater than or equal to
+
+671
+00:28:31,534 --> 00:28:32,740
+b, is greater than or equal to e,
+
+672
+00:28:32,742 --> 00:28:33,806
+is greater than or equal to j
+
+673
+00:28:33,1932 --> 00:28:36,988
+And in general, what we're saying is that
+
+674
+00:28:36,990 --> 00:28:38,190
+a is greater than or equal to all
+
+675
+00:28:38,192 --> 00:28:39,192
+nodes in the tree
+
+676
+00:28:39,194 --> 00:28:40,296
+b is greater than or equal to all
+
+677
+00:28:40,298 --> 00:28:42,032
+nodes in its subtree, down here
+
+678
+00:28:42,394 --> 00:28:43,1166
+c is greater than or equal to all
+
+679
+00:28:43,1168 --> 00:28:44,1168
+nodes in its subtree
+
+680
+00:28:44,1170 --> 00:28:46,760
+That's what this lemma is saying
+
+681
+00:28:46,1010 --> 00:28:49,1590
+You can prove this lemma by induction
+
+682
+00:28:50,656 --> 00:28:52,1984
+But it's really simple
+
+683
+00:28:54,1328 --> 00:28:57,112
+If you have two nodes, i and j,
+
+684
+00:28:57,114 --> 00:28:59,636
+and j is somewhere in the subtree, that
+
+685
+00:28:59,638 --> 00:29:03,1696
+means there's some downward path from i to
+
+686
+00:29:03,1698 --> 00:29:04,1698
+j
+
+687
+00:29:04,1700 --> 00:29:05,1916
+And you know that for every edge we
+
+688
+00:29:05,1918 --> 00:29:08,1328
+traverse on a downward path, our key is
+
+689
+00:29:08,1330 --> 00:29:10,1120
+going down non-strictly
+
+690
+00:29:10,1122 --> 00:29:12,844
+Every child is less than or equal to
+
+691
+00:29:12,846 --> 00:29:13,846
+its parent
+
+692
+00:29:13,848 --> 00:29:14,848
+i is greater than or equal to this,
+
+693
+00:29:14,850 --> 00:29:15,850
+is greater than or equal to this, is
+
+694
+00:29:15,852 --> 00:29:16,852
+greater than or equal to this, is greater
+
+695
+00:29:16,854 --> 00:29:17,854
+than or equal to j
+
+696
+00:29:17,856 --> 00:29:21,1448
+So by transitivity of less than or equal
+
+697
+00:29:21,1450 --> 00:29:23,818
+to, you know that i is, in fact,
+
+698
+00:29:23,820 --> 00:29:24,820
+greater than or equal to j
+
+699
+00:29:24,822 --> 00:29:27,530
+Or sorry, the key in i is greater
+
+700
+00:29:27,532 --> 00:29:28,1110
+than or equal to the key in j
+
+701
+00:29:28,1112 --> 00:29:31,076
+This is what we're calling i, the index
+
+702
+00:29:31,078 --> 00:29:33,304
+This is what we would call q of
+
+703
+00:29:33,306 --> 00:29:34,306
+i
+
+704
+00:29:34,308 --> 00:29:37,848
+This is index j, q of j
+
+705
+00:29:39,668 --> 00:29:40,668
+OK
+
+706
+00:29:40,670 --> 00:29:45,1288
+Very different way to organize keys in a
+
+707
+00:29:45,1290 --> 00:29:46,1290
+tree
+
+708
+00:29:46,1292 --> 00:29:49,1684
+But as you might imagine, this is going
+
+709
+00:29:49,1686 --> 00:29:51,792
+to be good for priority queues, because priority
+
+710
+00:29:51,794 --> 00:29:53,1776
+queues just need to find the maximum element
+
+711
+00:29:54,660 --> 00:29:55,1540
+Then they need to delete it
+
+712
+00:29:55,1542 --> 00:29:57,1110
+That's going to be harder, because deleting the
+
+713
+00:29:57,1112 --> 00:29:59,578
+root is like, that's the hardest node
+
